@@ -12,7 +12,7 @@ description:
   llm: draw the image you want based on your prompt.
 extra:
   python:
-    source: tools/comfyui_stable_diffusion.py
+    source: tools/comfyui_txt2img.py
 identity:
   author: Qun
   label:

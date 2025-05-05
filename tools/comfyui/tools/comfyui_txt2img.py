@@ -43,7 +43,7 @@ class ModelType(Enum):
     FLUX = 4
 
 
-class ComfyuiStableDiffusionTool(Tool):
+class ComfyuiTxt2Img(Tool):
     def _invoke(
         self, tool_parameters: dict[str, Any]
     ) -> Generator[ToolInvokeMessage, None, None]:
