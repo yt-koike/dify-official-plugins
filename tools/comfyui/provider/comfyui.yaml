@@ -26,4 +26,6 @@ identity:
   - image
 tools:
 - tools/comfyui_workflow.yaml
-- tools/comfyui_stable_diffusion.yaml
+- tools/comfyui_txt2img.yaml
+- tools/comfyui_img2img.yaml
+- tools/comfyui_list_models.yaml
