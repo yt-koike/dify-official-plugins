@@ -19,7 +19,7 @@ from dify_plugin.entities.tool import (
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 from dify_plugin import Tool
 
-from provider import comfyui
+
 from tools.comfyui_client import FileType
 
 SD_TXT2IMG_OPTIONS = {}
@@ -58,6 +58,9 @@ class ComfyuiImg2Img(Tool):
         base_url = self.runtime.credentials.get("base_url", "")
         if not base_url:
             yield self.create_text_message("Please input base_url")
+        image_server_url = self.runtime.credentials.get("image_server_url", "")
+        if not image_server_url:
+            yield self.create_text_message("Please input image_server_url")
         if tool_parameters.get("model"):
             self.runtime.credentials["model"] = tool_parameters["model"]
         model = self.runtime.credentials.get("model", None)
@@ -80,7 +83,7 @@ class ComfyuiImg2Img(Tool):
         for image in images:
             if image.type != FileType.IMAGE:
                 continue
-            blob = httpx.get("http://100.98.35.73" + image.url)
+            blob = httpx.get(image_server_url.rstrip("/") + image.url, timeout=3)
             files = {
                 "image": (image.filename, blob, image.mime_type),
                 "overwrite": "true",

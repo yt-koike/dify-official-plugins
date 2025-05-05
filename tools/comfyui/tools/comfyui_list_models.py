@@ -7,7 +7,7 @@ from dify_plugin.entities.tool import (
 from dify_plugin import Tool
 
 
-class ComfyuiImg2Img(Tool):
+class ComfyuiListModels(Tool):
     def _invoke(
         self, tool_parameters: dict[str, Any]
     ) -> Generator[ToolInvokeMessage, None, None]:
