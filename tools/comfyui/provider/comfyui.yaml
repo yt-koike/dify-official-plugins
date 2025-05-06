@@ -37,4 +37,6 @@ tools:
 - tools/comfyui_workflow.yaml
 - tools/comfyui_txt2img.yaml
 - tools/comfyui_img2img.yaml
+- tools/comfyui_txt2vid.yaml
+- tools/comfyui_img2vid.yaml
 - tools/comfyui_list_models.yaml
