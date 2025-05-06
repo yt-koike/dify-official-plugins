@@ -292,7 +292,7 @@ class ComfyuiImg2Vid(Tool):
                         break
             yield self.create_blob_message(
                 blob=image,
-                meta={"mime_type": "image/png"},
+                meta={"mime_type": "image/webp"},
             )
         except Exception as e:
             yield self.create_text_message(f"Failed to generate image: {str(e)}")

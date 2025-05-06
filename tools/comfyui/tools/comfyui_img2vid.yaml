@@ -1,15 +1,11 @@
 description:
   human:
     en_US:
-      a pre-defined comfyui workflow that can use one model and up to 3 loras
-      to generate images. Support SD1.5, SDXL, SD3 and FLUX which contain text encoders/clip,
-      but does not support models that requires a triple clip loader.
+      Image to video model. Supports Stable Video Diffusion(SVD) only.
     pt_BR:
-      a pre-defined comfyui workflow that can use one model and up to 3 loras
-      to generate images. Support SD1.5, SDXL, SD3 and FLUX which contain text encoders/clip,
-      but does not support models that requires a triple clip loader.
+      Image to video model. Supports Stable Video Diffusion(SVD) only.
     zh_Hans: 一个预定义的 ComfyUI 工作流，可以使用一个模型和最多3个loras来生成图像。支持包含文本编码器/clip的SD1.5、SDXL、SD3和FLUX，但不支持需要clip加载器的模型。
-  llm: draw the image you want based on your prompt.
+  llm: generates video from image
 extra:
   python:
     source: tools/comfyui_img2vid.py
@@ -139,7 +135,7 @@ parameters:
     human_description:
       en_US: Frames
       pt_BR: Frames
-      zh_Hans: Frames
+      zh_Hans: 图像数量
     label:
       en_US: Frames
       pt_BR: Frames
