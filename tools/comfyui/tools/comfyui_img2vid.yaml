@@ -50,6 +50,34 @@ parameters:
     required: true
     type: string
 
+  - name: width
+    default: 800
+    form: llm
+    human_description:
+      en_US: Width
+      pt_BR: Width
+      zh_Hans: Width
+    label:
+      en_US: Width
+      pt_BR: Width
+      zh_Hans: Width
+    required: true
+    type: number
+
+  - name: height
+    default: 800
+    form: llm
+    human_description:
+      en_US: Height
+      pt_BR: Height
+      zh_Hans: Height
+    label:
+      en_US: Height
+      pt_BR: Height
+      zh_Hans: Height
+    required: true
+    type: number
+
   - name: steps
     form: llm
     human_description:
@@ -88,5 +116,33 @@ parameters:
       en_US: Denoise Ratio
       pt_BR: Denoise Ratio
       zh_Hans: Denoise Ratio
+    required: false
+    type: number
+
+  - name: fps
+    default: 6
+    form: llm
+    human_description:
+      en_US: FPS
+      pt_BR: FPS
+      zh_Hans: FPS
+    label:
+      en_US: FPS
+      pt_BR: FPS
+      zh_Hans: FPS
+    required: false
+    type: number
+
+  - name: frames
+    default: 14
+    form: llm
+    human_description:
+      en_US: Frames
+      pt_BR: Frames
+      zh_Hans: Frames
+    label:
+      en_US: Frames
+      pt_BR: Frames
+      zh_Hans: Frames
     required: false
     type: number
