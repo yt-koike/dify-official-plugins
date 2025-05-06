@@ -7,7 +7,6 @@ description:
       A highly practical solution for robust monocular depth estimation by training on a combination of 1.5M labeled images and 62M+ unlabeled images.
       https://github.com/kijai/ComfyUI-DepthAnythingV2
     zh_Hans: 透過在 1.5M 標記影像和 62M+ 非標記影像的組合上進行訓練，為強健的單眼深度估計提供了高度實用的解決方案。      https://github.com/kijai/ComfyUI-DepthAnythingV2
-
   llm: estimates the depth of a regular RGB image
 extra:
   python:

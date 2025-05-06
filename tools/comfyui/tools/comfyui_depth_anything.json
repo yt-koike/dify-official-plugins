@@ -30,7 +30,7 @@
         },
         "class_type": "LoadImage",
         "_meta": {
-            "title": "画像を読み込む"
+            "title": "LoadImage"
         }
     },
     "5": {
@@ -43,7 +43,7 @@
         },
         "class_type": "SaveImage",
         "_meta": {
-            "title": "画像を保存"
+            "title": "SaveImage"
         }
     }
 }

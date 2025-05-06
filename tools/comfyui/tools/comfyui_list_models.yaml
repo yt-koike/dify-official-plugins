@@ -5,6 +5,7 @@ description:
     pt_BR:
       Lists available checkpoints on connected ComfyUI.
     zh_Hans: 列出连接的 ComfyUI 上可用的检查点。
+    ja_JP: 利用可能なチェックポイントを取得します。
   llm: lists available checkpoints on connected ComfyUI.
 extra:
   python:
@@ -14,6 +15,7 @@ identity:
   label:
     en_US: List models
     zh_Hans: List models
+    ja_JP: モデル取得
   name: list_model
 output_schema:
   type: object
@@ -23,3 +25,4 @@ output_schema:
       label:
         en_US: Models
         zh_Hans: 模型
+        ja_JP: モデル

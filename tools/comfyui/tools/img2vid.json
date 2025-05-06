@@ -26,7 +26,7 @@
         },
         "class_type": "KSampler",
         "_meta": {
-            "title": "Kサンプラー"
+            "title": "KSampler"
         }
     },
     "8": {
@@ -42,7 +42,7 @@
         },
         "class_type": "VAEDecode",
         "_meta": {
-            "title": "VAEデコード"
+            "title": "VAEDecode"
         }
     },
     "10": {
@@ -59,7 +59,7 @@
         },
         "class_type": "SaveAnimatedWEBP",
         "_meta": {
-            "title": "アニメーションWEBPを保存"
+            "title": "SaveAnimatedWEBP"
         }
     },
     "12": {
@@ -85,7 +85,7 @@
         },
         "class_type": "SVD_img2vid_Conditioning",
         "_meta": {
-            "title": "SVD_img2vid条件付け"
+            "title": "SVD_img2vid_Conditioning"
         }
     },
     "14": {
@@ -98,7 +98,7 @@
         },
         "class_type": "VideoLinearCFGGuidance",
         "_meta": {
-            "title": "ビデオ線形CFGガイダンス"
+            "title": "VideoLinearCFGGuidance"
         }
     },
     "15": {
@@ -107,7 +107,7 @@
         },
         "class_type": "ImageOnlyCheckpointLoader",
         "_meta": {
-            "title": "画像のみのチェックポイントローダー（img2vidモデル）"
+            "title": "load img2vid model"
         }
     },
     "23": {
@@ -116,7 +116,7 @@
         },
         "class_type": "LoadImage",
         "_meta": {
-            "title": "画像を読み込む"
+            "title": "LoadImage"
         }
     }
 }
