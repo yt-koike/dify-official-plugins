@@ -75,17 +75,17 @@ class ComfyuiImg2Vid(Tool):
             raise ToolProviderCredentialValidationError(
                 f"sampler {sampler_name} does not exist"
             )
-        scheduler = tool_parameters.get("scheduler", "normal")
+        scheduler = tool_parameters.get("scheduler", "karras")
         if scheduler not in valid_schedulers:
             raise ToolProviderCredentialValidationError(
                 f"scheduler {scheduler} does not exist"
             )
-        cfg = tool_parameters.get("cfg", 7.0)
-        denoise = tool_parameters.get("denoise", 0.8)
+        cfg = tool_parameters.get("cfg", 2.5)
+        denoise = tool_parameters.get("denoise", 1.0)
         width = tool_parameters.get("width", 800)
         height = tool_parameters.get("height", 800)
-        fps = tool_parameters.get("fps", 0.8)
-        frames = tool_parameters.get("frames", 0.8)
+        fps = tool_parameters.get("fps", 6)
+        frames = tool_parameters.get("frames", 14)
         model_type = tool_parameters.get("model_type", ModelType.SD15.name)
         images = tool_parameters.get("images") or []
         image_names = []

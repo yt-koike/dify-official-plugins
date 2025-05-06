@@ -83,6 +83,7 @@ parameters:
 
   - name: steps
     form: llm
+    default: 20
     human_description:
       en_US: Steps
       pt_BR: Steps
@@ -97,7 +98,7 @@ parameters:
     type: number
 
   - name: cfg
-    default: 7.0
+    default: 2.5
     form: llm
     human_description:
       en_US: CFG Scale
@@ -113,7 +114,7 @@ parameters:
     type: number
 
   - name: denoise
-    default: 0.8
+    default: 1.0
     form: llm
     human_description:
       en_US: Denoise Ratio
@@ -155,3 +156,31 @@ parameters:
       ja_JP: Frames
     required: false
     type: number
+
+  - name: sampler_name
+    form: llm
+    default: eular
+    human_description:
+      en_US: Sampling method
+      pt_BR: Sampling method
+      zh_Hans: Sampling method
+    label:
+      en_US: Sampling method
+      pt_BR: Sampling method
+      zh_Hans: Sampling method
+    required: true
+    type: string
+
+  - name: scheduler
+    default: normal
+    form: llm
+    human_description:
+      en_US: Scheduler
+      pt_BR: Scheduler
+      zh_Hans: Scheduler
+    label:
+      en_US: Scheduler
+      pt_BR: Scheduler
+      zh_Hans: Scheduler
+    required: true
+    type: string
