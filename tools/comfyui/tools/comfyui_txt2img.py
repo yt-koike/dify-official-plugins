@@ -4,10 +4,7 @@ import random
 import uuid
 from copy import deepcopy
 from enum import Enum
-from typing import Any, Generator, Union
-import websocket
-from httpx import get, post
-from yarl import URL
+from typing import Any, Generator
 from dify_plugin.entities.tool import (
     ToolInvokeMessage,
     ToolParameter,
@@ -16,6 +13,8 @@ from dify_plugin.entities.tool import (
 )
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 from dify_plugin import Tool
+
+from tools.comfyui_client import ComfyUiClient
 
 SD_TXT2IMG_OPTIONS = {}
 LORA_NODE = {
@@ -53,12 +52,13 @@ class ComfyuiTxt2Img(Tool):
         base_url = self.runtime.credentials.get("base_url", "")
         if not base_url:
             yield self.create_text_message("Please input base_url")
+        self.cli = ComfyUiClient(base_url)
         if tool_parameters.get("model"):
             self.runtime.credentials["model"] = tool_parameters["model"]
         model = self.runtime.credentials.get("model", None)
         if not model:
             yield self.create_text_message("Please input model")
-        if model not in self.get_checkpoints():
+        if model not in self.cli.get_checkpoints():
             raise ToolProviderCredentialValidationError(f"model {model} does not exist")
         prompt = tool_parameters.get("prompt", "")
         if not prompt:
@@ -67,7 +67,8 @@ class ComfyuiTxt2Img(Tool):
         width = tool_parameters.get("width", 1024)
         height = tool_parameters.get("height", 1024)
         steps = tool_parameters.get("steps", 1)
-        valid_samplers, valid_schedulers = self.get_sample_methods()
+        valid_samplers = self.cli.get_samplers()
+        valid_schedulers = self.cli.get_schedulers()
         sampler_name = tool_parameters.get("sampler_name", "euler")
         if sampler_name not in valid_samplers:
             raise ToolProviderCredentialValidationError(
@@ -92,7 +93,6 @@ class ComfyuiTxt2Img(Tool):
             lora_list.append(tool_parameters["lora_3"])
             lora_strength_list.append(tool_parameters.get("lora_strength_3", 1))
         yield from self.text2img(
-            base_url=base_url,
             model=model,
             model_type=model_type,
             prompt=prompt,
@@ -107,159 +107,8 @@ class ComfyuiTxt2Img(Tool):
             lora_strength_list=lora_strength_list,
         )
 
-    def get_checkpoints(self) -> list[str]:
-        """
-        get checkpoints
-        """
-        try:
-            base_url = self.runtime.credentials.get("base_url", None)
-            if not base_url:
-                return []
-            api_url = str(URL(base_url) / "models" / "checkpoints")
-            response = get(url=api_url, timeout=(2, 10))
-            if response.status_code != 200:
-                return []
-            else:
-                return response.json()
-        except Exception as e:
-            return []
-
-    def get_loras(self) -> list[str]:
-        """
-        get loras
-        """
-        try:
-            base_url = self.runtime.credentials.get("base_url", None)
-            if not base_url:
-                return []
-            api_url = str(URL(base_url) / "models" / "loras")
-            response = get(url=api_url, timeout=(2, 10))
-            if response.status_code != 200:
-                return []
-            else:
-                return response.json()
-        except Exception as e:
-            return []
-
-    def get_sample_methods(self) -> tuple[list[str], list[str]]:
-        """
-        get sample method
-        """
-        try:
-            base_url = self.runtime.credentials.get("base_url", None)
-            if not base_url:
-                return ([], [])
-            api_url = str(URL(base_url) / "object_info" / "KSampler")
-            response = get(url=api_url, timeout=(2, 10))
-            if response.status_code != 200:
-                return ([], [])
-            else:
-                data = response.json()["KSampler"]["input"]["required"]
-                return (data["sampler_name"][0], data["scheduler"][0])
-        except Exception as e:
-            return ([], [])
-
-    def validate_models(self) -> Union[ToolInvokeMessage, list[ToolInvokeMessage]]:
-        """
-        validate models
-        """
-        try:
-            base_url = self.runtime.credentials.get("base_url", None)
-            if not base_url:
-                raise ToolProviderCredentialValidationError("Please input base_url")
-            model = self.runtime.credentials.get("model", None)
-            if not model:
-                raise ToolProviderCredentialValidationError("Please input model")
-            api_url = str(URL(base_url) / "models" / "checkpoints")
-            response = get(url=api_url, timeout=(2, 10))
-            if response.status_code != 200:
-                raise ToolProviderCredentialValidationError("Failed to get models")
-            else:
-                models = response.json()
-                if len([d for d in models if d == model]) > 0:
-                    return self.create_text_message(json.dumps(models))
-                else:
-                    raise ToolProviderCredentialValidationError(
-                        f"model {model} does not exist"
-                    )
-        except Exception as e:
-            raise ToolProviderCredentialValidationError(f"Failed to get models, {e}")
-
-    def get_history(self, base_url, prompt_id):
-        """
-        get history
-        """
-        url = str(URL(base_url) / "history")
-        respond = get(url, params={"prompt_id": prompt_id}, timeout=(2, 10))
-        return respond.json()
-
-    def download_image(self, base_url, filename, subfolder, folder_type):
-        """
-        download image
-        """
-        url = str(URL(base_url) / "view")
-        response = get(
-            url,
-            params={"filename": filename, "subfolder": subfolder, "type": folder_type},
-            timeout=(2, 10),
-        )
-        return response.content
-
-    def queue_prompt_image(self, base_url, client_id, prompt):
-        """
-        send prompt task and rotate
-        """
-        url = str(URL(base_url) / "prompt")
-        respond = post(
-            url,
-            data=json.dumps({"client_id": client_id, "prompt": prompt}),
-            timeout=(2, 10),
-        )
-        prompt_id = respond.json()["prompt_id"]
-        ws = websocket.WebSocket()
-        if "https" in base_url:
-            ws_url = base_url.replace("https", "ws")
-        else:
-            ws_url = base_url.replace("http", "ws")
-        ws.connect(str(URL(f"{ws_url}") / "ws") + f"?clientId={client_id}", timeout=120)
-        output_images = {}
-        while True:
-            out = ws.recv()
-            if isinstance(out, str):
-                message = json.loads(out)
-                if message["type"] == "executing":
-                    data = message["data"]
-                    if data["node"] is None and data["prompt_id"] == prompt_id:
-                        break
-                elif message["type"] == "status":
-                    data = message["data"]
-                    if data["status"]["exec_info"]["queue_remaining"] == 0 and data.get(
-                        "sid"
-                    ):
-                        break
-            else:
-                continue
-        history = self.get_history(base_url, prompt_id)[prompt_id]
-        for o in history["outputs"]:
-            for node_id in history["outputs"]:
-                node_output = history["outputs"][node_id]
-                if "images" in node_output:
-                    images_output = []
-                    for image in node_output["images"]:
-                        image_data = self.download_image(
-                            base_url,
-                            image["filename"],
-                            image["subfolder"],
-                            image["type"],
-                        )
-                        images_output.append(image_data)
-                    output_images[node_id] = images_output
-        ws.close()
-        return output_images
-
     def text2img(
         self,
-        base_url: str,
         model: str,
         model_type: str,
         prompt: str,
@@ -318,7 +167,7 @@ class ComfyuiTxt2Img(Tool):
             draw_options["3"]["inputs"]["positive"][0] = last_node_id
         try:
             client_id = str(uuid.uuid4())
-            result = self.queue_prompt_image(base_url, client_id, prompt=draw_options)
+            result = self.cli.queue_prompt_image(client_id, prompt=draw_options)
             image = b""
             for node in result:
                 for img in result[node]:
@@ -349,7 +198,7 @@ class ComfyuiTxt2Img(Tool):
         ]
         if self.runtime.credentials:
             try:
-                models = self.get_checkpoints()
+                models = self.cli.get_checkpoints()
                 if len(models) != 0:
                     parameters.append(
                         ToolParameter(
@@ -372,7 +221,7 @@ class ComfyuiTxt2Img(Tool):
                             ],
                         )
                     )
-                loras = self.get_loras()
+                loras = self.cli.get_loras()
                 if len(loras) != 0:
                     for n in range(1, 4):
                         parameters.append(
@@ -397,7 +246,8 @@ class ComfyuiTxt2Img(Tool):
                                 ],
                             )
                         )
-                (sample_methods, schedulers) = self.get_sample_methods()
+                sample_methods = self.cli.get_samplers()
+                schedulers = self.cli.get_schedulers()
                 if len(sample_methods) != 0:
                     parameters.append(
                         ToolParameter(

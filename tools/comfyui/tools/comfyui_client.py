@@ -2,9 +2,9 @@ from enum import StrEnum
 import json
 import random
 import uuid
-from typing import Any
 
 import httpx
+import requests
 from websocket import WebSocket
 from yarl import URL
 
@@ -34,6 +34,23 @@ class ComfyUiClient:
         """
         try:
             api_url = str(self.base_url / "models" / "checkpoints")
+            response = httpx.get(url=api_url, timeout=(2, 10))
+            if response.status_code != 200:
+                return []
+            else:
+                return response.json()
+        except Exception as e:
+            return []
+
+    def get_loras(self) -> list[str]:
+        """
+        get loras
+        """
+        try:
+            base_url = self.runtime.credentials.get("base_url", None)
+            if not base_url:
+                return []
+            api_url = str(URL(base_url) / "models" / "loras")
             response = httpx.get(url=api_url, timeout=(2, 10))
             if response.status_code != 200:
                 return []
@@ -83,6 +100,23 @@ class ComfyUiClient:
             params={"filename": filename, "subfolder": subfolder, "type": folder_type},
         )
         return response.content
+
+    def post_image(
+        self,
+        filename: str,
+        fileblob: bytes,
+        mime_type: str,
+    ) -> str | None:
+        files = {
+            "image": (filename, fileblob, mime_type),
+            "overwrite": "true",
+        }
+        try:
+            res = requests.post(str(self.base_url / "upload" / "image"), files=files)
+            image_name = res.json().get("name")
+            return image_name
+        except:
+            return None
 
     def queue_prompt(self, client_id: str, prompt: dict) -> str:
         res = httpx.post(
@@ -194,6 +228,18 @@ class ComfyUiClient:
             else:
                 continue
 
+    def download_image(self, filename, subfolder, folder_type):
+        """
+        download image
+        """
+        url = str(self.base_url / "view")
+        response = httpx.get(
+            url,
+            params={"filename": filename, "subfolder": subfolder, "type": folder_type},
+            timeout=(2, 10),
+        )
+        return response.content
+
     def generate_image_by_prompt(self, prompt: dict) -> list[dict[str, str | bytes]]:
         try:
             ws, client_id = self.open_websocket_connection()
@@ -216,3 +262,54 @@ class ComfyUiClient:
             return images
         finally:
             ws.close()
+
+    def queue_prompt_image(self, client_id, prompt):
+        """
+        send prompt task and rotate
+        """
+        url = str(self.base_url / "prompt")
+        respond = httpx.post(
+            url,
+            data=json.dumps({"client_id": client_id, "prompt": prompt}),
+            timeout=(2, 10),
+        )
+        prompt_id = respond.json()["prompt_id"]
+        ws = WebSocket()
+        if "https" == self.base_url.scheme:
+            ws_url = str(self.base_url).replace("https", "ws")
+        else:
+            ws_url = str(self.base_url).replace("http", "ws")
+        ws.connect(str(URL(f"{ws_url}") / "ws") + f"?clientId={client_id}", timeout=120)
+        output_images = {}
+        while True:
+            out = ws.recv()
+            if isinstance(out, str):
+                message = json.loads(out)
+                if message["type"] == "executing":
+                    data = message["data"]
+                    if data["node"] is None and data["prompt_id"] == prompt_id:
+                        break
+                elif message["type"] == "status":
+                    data = message["data"]
+                    if data["status"]["exec_info"]["queue_remaining"] == 0 and data.get(
+                        "sid"
+                    ):
+                        break
+            else:
+                continue
+        history = self.get_history(prompt_id)
+        for o in history["outputs"]:
+            for node_id in history["outputs"]:
+                node_output = history["outputs"][node_id]
+                if "images" in node_output:
+                    images_output = []
+                    for image in node_output["images"]:
+                        image_data = self.download_image(
+                            image["filename"],
+                            image["subfolder"],
+                            image["type"],
+                        )
+                        images_output.append(image_data)
+                    output_images[node_id] = images_output
+        ws.close()
+        return output_images
