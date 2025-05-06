@@ -28,6 +28,50 @@ class ComfyUiClient:
     def __init__(self, base_url: str):
         self.base_url = URL(base_url)
 
+    def get_checkpoints(self) -> list[str]:
+        """
+        get checkpoints
+        """
+        try:
+            api_url = str(self.base_url / "models" / "checkpoints")
+            response = httpx.get(url=api_url, timeout=(2, 10))
+            if response.status_code != 200:
+                return []
+            else:
+                return response.json()
+        except Exception as e:
+            return []
+
+    def get_samplers(self) -> list[str]:
+        """
+        get samplers
+        """
+        try:
+            api_url = str(self.base_url / "object_info" / "KSampler")
+            response = httpx.get(url=api_url, timeout=(2, 10))
+            if response.status_code != 200:
+                return []
+            else:
+                data = response.json()["KSampler"]["input"]["required"]
+                return data["sampler_name"][0]
+        except Exception as e:
+            return []
+
+    def get_schedulers(self) -> list[str]:
+        """
+        get schedulers
+        """
+        try:
+            api_url = str(self.base_url / "object_info" / "KSampler")
+            response = httpx.get(url=api_url, timeout=(2, 10))
+            if response.status_code != 200:
+                return []
+            else:
+                data = response.json()["KSampler"]["input"]["required"]
+                return data["scheduler"][0]
+        except Exception as e:
+            return []
+
     def get_history(self, prompt_id: str) -> dict:
         res = httpx.get(str(self.base_url / "history"), params={"prompt_id": prompt_id})
         history = res.json()[prompt_id]
@@ -54,7 +98,9 @@ class ComfyUiClient:
         ws_protocol = "ws"
         if self.base_url.scheme == "https":
             ws_protocol = "wss"
-        ws_address = f"{ws_protocol}://{self.base_url.authority}/ws?clientId={client_id}"
+        ws_address = (
+            f"{ws_protocol}://{self.base_url.authority}/ws?clientId={client_id}"
+        )
         ws.connect(ws_address)
         return ws, client_id
 
@@ -160,11 +206,13 @@ class ComfyUiClient:
                     image_data = self.get_image(
                         img["filename"], img["subfolder"], img["type"]
                     )
-                    images.append({
-                        "data": image_data,
-                        "filename": img["filename"],
-                        "type": img["type"],
-                    })
+                    images.append(
+                        {
+                            "data": image_data,
+                            "filename": img["filename"],
+                            "type": img["type"],
+                        }
+                    )
             return images
         finally:
             ws.close()

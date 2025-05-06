@@ -6,6 +6,8 @@ from dify_plugin.entities.tool import (
 )
 from dify_plugin import Tool
 
+from tools.comfyui_client import ComfyUiClient
+
 
 class ComfyuiListSamplers(Tool):
     def _invoke(
@@ -17,24 +19,6 @@ class ComfyuiListSamplers(Tool):
         base_url = self.runtime.credentials.get("base_url", "")
         if not base_url:
             yield self.create_text_message("Please input base_url")
-        sampling_methods, schedulers = self.get_sample_methods()
-        yield self.create_variable_message("sampling_methods", sampling_methods)
-        yield self.create_variable_message("schedulers", schedulers)
-
-    def get_sample_methods(self) -> tuple[list[str], list[str]]:
-        """
-        get sample method
-        """
-        try:
-            base_url = self.runtime.credentials.get("base_url", None)
-            if not base_url:
-                return ([], [])
-            api_url = str(URL(base_url) / "object_info" / "KSampler")
-            response = get(url=api_url, timeout=(2, 10))
-            if response.status_code != 200:
-                return ([], [])
-            else:
-                data = response.json()["KSampler"]["input"]["required"]
-                return (data["sampler_name"][0], data["scheduler"][0])
-        except Exception as e:
-            return ([], [])
+        cli = ComfyUiClient(base_url)
+        yield self.create_variable_message("sampling_methods", cli.get_samplers())
+        yield self.create_variable_message("schedulers", cli.get_schedulers())
