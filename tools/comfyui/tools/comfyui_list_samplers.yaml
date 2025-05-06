@@ -1,0 +1,34 @@
+description:
+  human:
+    en_US:
+      a pre-defined comfyui workflow that can use one model and up to 3 loras
+      to generate images. Support SD1.5, SDXL, SD3 and FLUX which contain text encoders/clip,
+      but does not support models that requires a triple clip loader.
+    pt_BR:
+      a pre-defined comfyui workflow that can use one model and up to 3 loras
+      to generate images. Support SD1.5, SDXL, SD3 and FLUX which contain text encoders/clip,
+      but does not support models that requires a triple clip loader.
+    zh_Hans: 一个预定义的 ComfyUI 工作流，可以使用一个模型和最多3个loras来生成图像。支持包含文本编码器/clip的SD1.5、SDXL、SD3和FLUX，但不支持需要clip加载器的模型。
+  llm: draw the image you want based on your prompt.
+extra:
+  python:
+    source: tools/comfyui_list_samplers.py
+identity:
+  author: yt-koike
+  label:
+    en_US: List samplers
+    zh_Hans: List samplers
+  name: list_samplers
+output_schema:
+  type: object
+  properties:
+    sampling_methods:
+      type: array[string]
+      label:
+        en_US: Sampling Methods
+        zh_Hans: Sampling Methods
+    schedulers:
+      type: array[string]
+      label:
+        en_US: Schedulers
+        zh_Hans: Schedulers
