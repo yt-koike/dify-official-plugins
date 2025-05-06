@@ -154,7 +154,8 @@ parameters:
     name: cfg
     required: false
     type: number
-  - form: form
+  - form: llm
+    default: eular
     human_description:
       en_US: Sampling method
       pt_BR: Sampling method
@@ -166,7 +167,8 @@ parameters:
     name: sampler_name
     required: false
     type: string
-  - form: form
+  - form: llm
+    default: normal
     human_description:
       en_US: Scheduler
       pt_BR: Scheduler
