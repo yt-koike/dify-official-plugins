@@ -40,5 +40,6 @@ tools:
 - tools/comfyui_img2vid.yaml
 - tools/comfyui_depth_anything.yaml
 - tools/comfyui_depth_pro.yaml
+- tools/comfyui_face_swap.yaml
 - tools/comfyui_list_models.yaml
 - tools/comfyui_list_samplers.yaml
