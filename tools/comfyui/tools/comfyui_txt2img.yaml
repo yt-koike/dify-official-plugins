@@ -41,7 +41,7 @@ parameters:
     name: prompt
     required: true
     type: string
-  - form: form
+  - form: llm
     human_description:
       en_US: Model Name
       pt_BR: Model Name
@@ -53,7 +53,7 @@ parameters:
     name: model
     required: true
     type: string
-  - form: form
+  - form: llm
     human_description:
       en_US: Model Type
       pt_BR: Model Type

@@ -11,8 +11,8 @@ credentials_for_provider:
     url: https://docs.dify.ai/guides/tools/tool-configuration/comfyui
   image_server_url:
     label:
-      en_US: The URL of API endpoint 
-      zh_Hans: The URL of API endpoint 
+      en_US: The URL of Dify API endpoint 
+      zh_Hans: The URL of Dify API endpoint 
     placeholder:
       en_US: Please input your API endpoint. For example, https://app.dify.ai:8080
       zh_Hans: 请输入你的 API endpoint 例子 https://app.dify.ai:8080

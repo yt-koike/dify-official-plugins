@@ -58,6 +58,8 @@ class ComfyuiTxt2Img(Tool):
         model = self.runtime.credentials.get("model", None)
         if not model:
             yield self.create_text_message("Please input model")
+        if model not in self.get_checkpoints():
+            raise ToolProviderCredentialValidationError(f"model {model} does not exist")
         prompt = tool_parameters.get("prompt", "")
         if not prompt:
             yield self.create_text_message("Please input prompt")

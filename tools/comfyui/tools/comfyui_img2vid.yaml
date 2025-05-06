@@ -40,13 +40,13 @@ parameters:
   - name: model
     form: llm
     human_description:
-      en_US: Model Name
-      pt_BR: Model Name
-      zh_Hans: 模型名称
+      en_US: Img2Vid Model Name (SVD only)
+      pt_BR: Img2Vid Model Name (SVD only)
+      zh_Hans: Img2Vid 模型名称 (SVD only)
     label:
-      en_US: Model Name
-      pt_BR: Model Name
-      zh_Hans: 模型名称
+      en_US: Img2Vid Model Name (SVD only)
+      pt_BR: Img2Vid Model Name (SVD only)
+      zh_Hans: Img2Vid 模型名称 (SVD only)
     required: true
     type: string
 

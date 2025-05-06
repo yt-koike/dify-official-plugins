@@ -67,6 +67,8 @@ class ComfyuiImg2Img(Tool):
         if not model:
             yield self.create_text_message("Please input model")
             return
+        if model not in self.get_checkpoints():
+            raise ToolProviderCredentialValidationError(f"model {model} does not exist")
         prompt = tool_parameters.get("prompt", "")
         if not prompt:
             yield self.create_text_message("Please input prompt")
@@ -159,32 +161,6 @@ class ComfyuiImg2Img(Tool):
                 return (data["sampler_name"][0], data["scheduler"][0])
         except Exception as e:
             return ([], [])
-
-    def validate_models(self) -> Union[ToolInvokeMessage, list[ToolInvokeMessage]]:
-        """
-        validate models
-        """
-        try:
-            base_url = self.runtime.credentials.get("base_url", None)
-            if not base_url:
-                raise ToolProviderCredentialValidationError("Please input base_url")
-            model = self.runtime.credentials.get("model", None)
-            if not model:
-                raise ToolProviderCredentialValidationError("Please input model")
-            api_url = str(URL(base_url) / "models" / "checkpoints")
-            response = get(url=api_url, timeout=(2, 10))
-            if response.status_code != 200:
-                raise ToolProviderCredentialValidationError("Failed to get models")
-            else:
-                models = response.json()
-                if len([d for d in models if d == model]) > 0:
-                    return self.create_text_message(json.dumps(models))
-                else:
-                    raise ToolProviderCredentialValidationError(
-                        f"model {model} does not exist"
-                    )
-        except Exception as e:
-            raise ToolProviderCredentialValidationError(f"Failed to get models, {e}")
 
     def get_history(self, base_url, prompt_id):
         """
