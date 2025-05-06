@@ -1,10 +1,10 @@
 description:
   human:
     en_US:
-      Face Swap
+      Face swap. Infuses a face on the second image to the first image.
     pt_BR:
-      Face Swap
-    zh_Hans: Face Swap
+      Face swap. Infuses a face on the second image to the first image.
+    zh_Hans: 换脸。将第二张图片上的人脸注入第一张图片。
   llm: swap faces
 extra:
   python:
