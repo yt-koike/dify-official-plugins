@@ -70,8 +70,17 @@ class ComfyuiImg2Vid(Tool):
         if model not in self.get_checkpoints():
             raise ToolProviderCredentialValidationError(f"model {model} does not exist")
         steps = tool_parameters.get("steps", 20)
+        valid_samplers, valid_schedulers = self.get_sample_methods()
         sampler_name = tool_parameters.get("sampler_name", "euler")
+        if sampler_name not in valid_samplers:
+            raise ToolProviderCredentialValidationError(
+                f"sampler {sampler_name} does not exist"
+            )
         scheduler = tool_parameters.get("scheduler", "normal")
+        if scheduler not in valid_schedulers:
+            raise ToolProviderCredentialValidationError(
+                f"scheduler {scheduler} does not exist"
+            )
         cfg = tool_parameters.get("cfg", 7.0)
         denoise = tool_parameters.get("denoise", 0.8)
         width = tool_parameters.get("width", 800)

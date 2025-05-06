@@ -75,8 +75,17 @@ class ComfyuiImg2Img(Tool):
             return
         negative_prompt = tool_parameters.get("negative_prompt", "")
         steps = tool_parameters.get("steps", 20)
+        valid_samplers, valid_schedulers = self.get_sample_methods()
         sampler_name = tool_parameters.get("sampler_name", "euler")
+        if sampler_name not in valid_samplers:
+            raise ToolProviderCredentialValidationError(
+                f"sampler {sampler_name} does not exist"
+            )
         scheduler = tool_parameters.get("scheduler", "normal")
+        if scheduler not in valid_schedulers:
+            raise ToolProviderCredentialValidationError(
+                f"scheduler {scheduler} does not exist"
+            )
         cfg = tool_parameters.get("cfg", 7.0)
         denoise = tool_parameters.get("denoise", 0.8)
         model_type = tool_parameters.get("model_type", ModelType.SD15.name)
