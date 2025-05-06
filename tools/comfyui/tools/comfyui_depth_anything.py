@@ -62,4 +62,6 @@ class ComfyuiDepthAnything(Tool):
                 meta={"mime_type": "image/png"},
             )
         except Exception as e:
-            yield self.create_text_message(f"Failed to generate image: {str(e)}")
+            raise ToolProviderCredentialValidationError(
+                f"Failed to generate image: {str(e)}. Maybe install https://github.com/kijai/ComfyUI-DepthAnythingV2 on ComfyUI"
+            )
