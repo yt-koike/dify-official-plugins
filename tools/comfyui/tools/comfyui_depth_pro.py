@@ -23,7 +23,6 @@ class ComfyuiDepthPro(Tool):
         if not precision:
             yield self.create_text_message("Please input precision")
             return
-
         images = tool_parameters.get("images") or []
         image_names = []
         for image in images:
