@@ -5,10 +5,7 @@ description:
     pt_BR:
       A foundation model for zero-shot metric monocular depth estimation developed by Apple. https://github.com/spacepxl/ComfyUI-Depth-Pro
     zh_Hans: Apple 所開發的零拍公制單眼深度估計基礎模型。https://github.com/spacepxl/ComfyUI-Depth-Pro
-<<<<<<< HEAD
     ja_JP: Apple 社によって開発されたゼロショット・メトリック単眼深度推定の基礎モデル https://github.com/spacepxl/ComfyUI-Depth-Pro
-=======
->>>>>>> fd9c1f8acb6047a15a1b2cc80bd529171072799b
   llm: estimates depth of a regular RGB image
 extra:
   python:
