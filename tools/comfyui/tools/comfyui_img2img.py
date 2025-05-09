@@ -5,7 +5,6 @@ import uuid
 from copy import deepcopy
 from enum import Enum
 from typing import Any, Generator
-import httpx
 from dify_plugin.entities.tool import (
     ToolInvokeMessage,
     ToolParameter,
@@ -85,19 +84,13 @@ class ComfyuiImg2Img(Tool):
             )
         cfg = tool_parameters.get("cfg", 7.0)
         denoise = tool_parameters.get("denoise", 0.8)
-        model_type = tool_parameters.get("model_type", ModelType.SD15.name)
         images = tool_parameters.get("images") or []
         image_names = []
         for image in images:
             if image.type != FileType.IMAGE:
                 continue
-            files = {
-                "image": (image.filename, image.blob, image.mime_type),
-                "overwrite": "true",
-            }
-            res = httpx.post(
-                str(self.comfyui.base_url / "upload/image"), files=files)
-            image_name = res.json().get("name")
+            image_name = self.comfyui.post_image(
+                image.filename, image.blob, image.mime_type)
             image_names.append(image_name)
         if len(image_names) == 0:
             yield self.create_text_message("Please input images")

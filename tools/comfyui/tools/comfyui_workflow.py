@@ -3,7 +3,6 @@ import mimetypes
 from typing import Any, Generator
 from dify_plugin.entities.tool import ToolInvokeMessage
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
-import httpx
 from tools.comfyui_client import ComfyUiClient, FileType
 from dify_plugin import Tool
 
@@ -29,13 +28,8 @@ class ComfyUIWorkflowTool(Tool):
         for image in images:
             if image.type != FileType.IMAGE:
                 continue
-            files = {
-                "image": (image.filename, image.blob, image.mime_type),
-                "overwrite": "true",
-            }
-            res = httpx.post(
-                str(self.comfyui.base_url / "upload/image"), files=files)
-            image_name = res.json().get("name")
+            image_name = self.comfyui.post_image(
+                image.filename, image.blob, image.mime_type)
             image_names.append(image_name)
         set_prompt_with_ksampler = True
         if "{{positive_prompt}}" in workflow:

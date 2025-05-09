@@ -2,7 +2,6 @@ import json
 import os
 import uuid
 from typing import Any, Generator
-import httpx
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 from dify_plugin.entities.tool import ToolInvokeMessage
 from dify_plugin import Tool
@@ -30,13 +29,8 @@ class ComfyuiDepthPro(Tool):
         for image in images:
             if image.type != FileType.IMAGE:
                 continue
-            files = {
-                "image": (image.filename, image.blob, image.mime_type),
-                "overwrite": "true",
-            }
-            res = httpx.post(
-                str(self.comfyui.base_url / "upload/image"), files=files)
-            image_name = res.json().get("name")
+            image_name = self.comfyui.post_image(
+                image.filename, image.blob, image.mime_type)
             image_names.append(image_name)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
