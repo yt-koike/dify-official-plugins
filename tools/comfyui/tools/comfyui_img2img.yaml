@@ -15,7 +15,8 @@ identity:
   label:
     en_US: Img2Img
     pt_BR: Img2Img
-    zh_Hans: Img2Img
+    zh_Hans: 图像到图像
+    ja_JP: 画像to画像
   name: img2img
 
 parameters:
