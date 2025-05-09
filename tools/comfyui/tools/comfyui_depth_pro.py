@@ -19,25 +19,24 @@ class ComfyuiDepthPro(Tool):
         base_url = self.runtime.credentials.get("base_url", "")
         if not base_url:
             yield self.create_text_message("Please input base_url")
-        self.cli = ComfyUiClient(base_url)
+        self.comfyui = ComfyUiClient(base_url)
         precision = tool_parameters.get("precision", None)
         if not precision:
             yield self.create_text_message("Please input precision")
             return
-        image_server_url = self.runtime.credentials.get("image_server_url", "")
-        if not image_server_url:
-            yield self.create_text_message("Please input image_server_url")
+
         images = tool_parameters.get("images") or []
         image_names = []
         for image in images:
             if image.type != FileType.IMAGE:
                 continue
-            blob = httpx.get(image_server_url.rstrip("/") + image.url, timeout=3)
-            image_name = self.cli.post_image(image.filename, blob, image.mime_type)
-            if image_name is None:
-                raise ToolProviderCredentialValidationError(
-                    f"File upload to ComfyUI failed"
-                )
+            files = {
+                "image": (image.filename, image.blob, image.mime_type),
+                "overwrite": "true",
+            }
+            res = httpx.post(
+                str(self.comfyui.base_url / "upload/image"), files=files)
+            image_name = res.json().get("name")
             image_names.append(image_name)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -48,7 +47,8 @@ class ComfyuiDepthPro(Tool):
 
         try:
             client_id = str(uuid.uuid4())
-            result = self.cli.queue_prompt_image(client_id, prompt=draw_options)
+            result = self.comfyui.queue_prompt_image(
+                client_id, prompt=draw_options)
             image = b""
             for node in result:
                 for img in result[node]:
