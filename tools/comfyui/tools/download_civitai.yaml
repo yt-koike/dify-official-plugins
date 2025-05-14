@@ -1,0 +1,105 @@
+description:
+  human:
+    en_US: Download from CivitAI
+  llm: Download from CivitAI
+extra:
+  python:
+    source: tools/download_civitai.py
+identity:
+  author: yt-koike
+  label:
+    en_US: CivitAI Download
+  name: download_civitai
+parameters:
+  - name: model_id
+    form: llm
+    label:
+      en_US: Model ID
+      zh_Hans: Model ID
+      ja_JP: Model ID
+    llm_description: model id
+    type: number
+    human_description:
+      en_US: Model ID
+      zh_Hans: Model ID
+      ja_JP: Model ID
+    required: true
+  - name: version_id
+    form: llm
+    label:
+      en_US: Version ID
+      zh_Hans: Version ID
+      ja_JP: Version ID
+    llm_description: Version ID
+    type: number
+    human_description:
+      en_US: Version ID
+      zh_Hans: Version ID
+      ja_JP: Version ID
+    required: true
+  - name: save_dir
+    form: form
+    label:
+      en_US: Save Directory
+      zh_Hans: Save Directory
+      ja_JP: Save Directory
+    llm_description: Save Directory
+    type: select
+    human_description:
+      en_US: Save Directory
+      zh_Hans: Save Directory
+      ja_JP: Save Directory
+    options:
+      - value: checkpoints
+        label:
+          en_US: checkpoints
+      - value: loras
+        label:
+          en_US: loras
+      - value: vae
+        label:
+          en_US: vae
+      - value: controlnet
+        label:
+          en_US: controlnet
+      - value: text_encoders
+        label:
+          en_US: text_encoders
+      - value: upscale_models
+        label:
+          en_US: upscale_models
+      - value: diffusion_models
+        label:
+          en_US: diffusion_models
+      - value: clip_vision
+        label:
+          en_US: clip_vision
+      - value: style_models
+        label:
+          en_US: style_models
+      - value: embeddings
+        label:
+          en_US: embeddings
+      - value: diffusers
+        label:
+          en_US: diffusers
+      - value: vae_approx
+        label:
+          en_US: vae_approx
+    required: true
+
+output_schema:
+  type: object
+  properties:
+    model_name:
+      type: string
+      label:
+        en_US: Model Name
+        zh_Hans: Model Name
+        ja_JP: Model Name
+    model_filename:
+      type: string
+      label:
+        en_US: Model Filename
+        zh_Hans: Model Filename
+        ja_JP: Model Filename
