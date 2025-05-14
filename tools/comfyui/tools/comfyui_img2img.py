@@ -182,7 +182,7 @@ class ComfyuiImg2Img(Tool):
             sampler_node["inputs"]["model"][0] = str(lora_end_id)
             prompt_node["inputs"]["clip"][0] = str(lora_end_id)
             negative_prompt_node["inputs"]["clip"][0] = str(lora_end_id)
-        yield self.create_text_message(str(draw_options))
+
         try:
             client_id = str(uuid.uuid4())
             result = self.comfyui.queue_prompt_image(

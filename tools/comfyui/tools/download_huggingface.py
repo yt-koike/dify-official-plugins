@@ -7,6 +7,7 @@ from dify_plugin.entities.tool import ToolInvokeMessage
 from dify_plugin import Tool
 
 from tools.comfyui_client import ComfyUiClient
+from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 
 
 class DownloadHuggingFace(Tool):
@@ -39,6 +40,6 @@ class DownloadHuggingFace(Tool):
             self.comfyui.queue_prompt_image(client_id, prompt=draw_options)
             yield self.create_variable_message("filename", filename)
         except Exception as e:
-            yield self.create_text_message(
+            raise ToolProviderCredentialValidationError(
                 f"Failed to generate image: {str(e)}. Maybe install https://github.com/ciri/comfyui-model-downloader on ComfyUI"
             )

@@ -8,6 +8,7 @@ from dify_plugin import Tool
 
 import httpx
 from tools.comfyui_client import ComfyUiClient
+from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 
 
 class DownloadCivitAI(Tool):
@@ -62,6 +63,6 @@ class DownloadCivitAI(Tool):
             yield self.create_variable_message("model_name_human", model_name_human)
             yield self.create_variable_message("model_name", model_filenames[0])
         except Exception as e:
-            yield self.create_text_message(
+            raise ToolProviderCredentialValidationError(
                 f"Failed to generate image: {str(e)}. Maybe install https://github.com/ciri/comfyui-model-downloader on ComfyUI"
             )
