@@ -95,7 +95,7 @@ class ComfyuiImg2Img(Tool):
                 "Please input images")
 
         lora_list = []
-        if tool_parameters.get("lora_names") is not None:
+        if len(tool_parameters.get("lora_names", "")) > 0:
             lora_list = tool_parameters.get("lora_names").split(",")
         lora_list = [x.lstrip(" ").rstrip(" ") for x in lora_list]
         valid_loras = self.comfyui.get_loras()
@@ -104,7 +104,7 @@ class ComfyuiImg2Img(Tool):
                 raise ToolProviderCredentialValidationError(
                     f"LORA {lora} does not exist.")
         lora_strength_list = []
-        if tool_parameters.get("lora_strengths") is not None:
+        if len(tool_parameters.get("lora_strengths", "")) > 0:
             lora_strength_list = [float(x.lstrip(" ").rstrip(" ")) for x in tool_parameters.get(
                 "lora_strengths").split(",")]
 

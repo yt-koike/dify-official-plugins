@@ -84,7 +84,7 @@ class ComfyuiTxt2Img(Tool):
         model_type = tool_parameters.get("model_type", ModelType.SD15.name)
 
         lora_list = []
-        if tool_parameters.get("lora_names") is not None:
+        if len(tool_parameters.get("lora_names", "")) > 0:
             lora_list = tool_parameters.get("lora_names").split(",")
         valid_loras = self.comfyui.get_loras()
         for lora in lora_list:
@@ -93,7 +93,7 @@ class ComfyuiTxt2Img(Tool):
                     f"LORA {lora} does not exist.")
 
         lora_strength_list = []
-        if tool_parameters.get("lora_strengths") is not None:
+        if len(tool_parameters.get("lora_strengths", "")) > 0:
             lora_strength_list = [float(x) for x in tool_parameters.get(
                 "lora_strengths").split(",")]
 
