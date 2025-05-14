@@ -115,7 +115,7 @@ CivitAI Download node can download models from [CivitAI](https://civitai.com/hom
 You need to input model ID and version ID to download a model.
 These two IDs are shown as AIR(see the highlited area on the image below).
 
-![](_assets/AIR.png)
+![](_assets/AIR.jpg)
 
 You need to install https://github.com/ciri/comfyui-model-downloader to ComfyUI in advance.
 
