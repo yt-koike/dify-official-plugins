@@ -16,13 +16,19 @@ identity:
     en_US: List models
     zh_Hans: List models
     ja_JP: モデル取得
-  name: list_model
+  name: list_models
 output_schema:
   type: object
   properties:
-    models:
+    checkpoints:
       type: array[string]
       label:
-        en_US: Models
+        en_US: Checkpoints
         zh_Hans: 模型
         ja_JP: モデル
+    upscale_models:
+      type: array[string]
+      label:
+        en_US: Upscale models
+        zh_Hans: 放大机型
+        ja_JP: アップスケールモデル
