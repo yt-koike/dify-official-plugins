@@ -70,9 +70,9 @@ Txt2Img node can generate an image from texts(prompt and negative prompt).
 Img2Img node can edit an given image according to prompt and negative prompt.
 
 ### Img2Vid
-<a id="###Img2Vid"></a>
+
 Img2Vid node can generate an video from an given image.
-You need to install [SVD model](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid) or [SVD XT model](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt) to ComfyUI in advance. [Hugging Face Download node](###Hugging Face Download) would be helpful to 
+You need to install [SVD model](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid) or [SVD XT model](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt) to ComfyUI in advance. [Hugging Face Download node](#hugging-face-download) would be helpful to 
 download them.
 
 ### Upscale
@@ -107,7 +107,7 @@ List Samplers node can fetch all samplers and schedulers available on the connec
 
 Image Info node can extract basic information from a given image.
 These include width, height, [mode](https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes), filename and MIME type.
-This node would be useful when you use [Img2Vid node](###Img2Vid).
+This node would be useful when you use [Img2Vid node](#img2vid).
 
 ### CivitAI Download
 
@@ -118,6 +118,4 @@ These two IDs are shown as AIR(see the highlited area on the image below).
 ![](_assets/AIR.png)
 
 ### Hugging Face Download
-<a id="###Hugging Face Download"></a>
-
 Hugging Face Download can download models from [Hugging Face](https://huggingface.co/).
