@@ -59,15 +59,13 @@ class ComfyuiImg2Img(Tool):
             self.runtime.credentials["model"] = tool_parameters["model"]
         model = self.runtime.credentials.get("model", None)
         if not model:
-            yield self.create_text_message("Please input model")
-            return
+            raise ToolProviderCredentialValidationError("Please input model")
         if model not in self.comfyui.get_checkpoints():
             raise ToolProviderCredentialValidationError(
                 f"model {model} does not exist")
         prompt = tool_parameters.get("prompt", "")
         if not prompt:
-            yield self.create_text_message("Please input prompt")
-            return
+            raise ToolProviderCredentialValidationError("Please input prompt")
         negative_prompt = tool_parameters.get("negative_prompt", "")
         steps = tool_parameters.get("steps", 20)
         valid_samplers = self.comfyui.get_samplers()
@@ -93,8 +91,8 @@ class ComfyuiImg2Img(Tool):
                 image.filename, image.blob, image.mime_type)
             image_names.append(image_name)
         if len(image_names) == 0:
-            yield self.create_text_message("Please input images")
-            return
+            raise ToolProviderCredentialValidationError(
+                "Please input images")
 
         lora_list = []
         if tool_parameters.get("lora_names") is not None:
@@ -103,8 +101,8 @@ class ComfyuiImg2Img(Tool):
         valid_loras = self.comfyui.get_loras()
         for lora in lora_list:
             if lora not in valid_loras:
-                yield self.create_text_message(f"LORA {lora} does not exist.")
-                return
+                raise ToolProviderCredentialValidationError(
+                    f"LORA {lora} does not exist.")
         lora_strength_list = []
         if tool_parameters.get("lora_strengths") is not None:
             lora_strength_list = [float(x.lstrip(" ").rstrip(" ")) for x in tool_parameters.get(

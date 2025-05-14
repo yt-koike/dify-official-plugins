@@ -89,8 +89,9 @@ class ComfyuiTxt2Img(Tool):
         valid_loras = self.comfyui.get_loras()
         for lora in lora_list:
             if lora not in valid_loras:
-                yield self.create_text_message(f"LORA {lora} does not exist.")
-                return
+                raise ToolProviderCredentialValidationError(
+                    f"LORA {lora} does not exist.")
+
         lora_strength_list = []
         if tool_parameters.get("lora_strengths") is not None:
             lora_strength_list = [float(x) for x in tool_parameters.get(

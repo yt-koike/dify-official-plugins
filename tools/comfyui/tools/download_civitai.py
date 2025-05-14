@@ -20,12 +20,12 @@ class DownloadCivitAI(Tool):
         """
         base_url = self.runtime.credentials.get("base_url", "")
         if not base_url:
-            yield self.create_text_message("Please input base_url")
-            return
+            raise ToolProviderCredentialValidationError(
+                "Please input base_url")
         civitai_api_key = self.runtime.credentials.get("civitai_api_key", "")
         if not civitai_api_key:
-            yield self.create_text_message("Please input civitai_api_key")
-            return
+            raise ToolProviderCredentialValidationError(
+                "Please input civitai_api_key")
         self.comfyui = ComfyUiClient(base_url)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -40,16 +40,16 @@ class DownloadCivitAI(Tool):
                 f"https://civitai.com/api/v1/models/{model_id}").json()
             model_name_human = model_data["name"]
         except:
-            yield self.create_text_message(f"Model {model_id} not found.")
-            return
+            raise ToolProviderCredentialValidationError(
+                f"Model {model_id} not found.")
         model_detail = None
         for past_model in model_data["modelVersions"]:
             if past_model["id"] == version_id:
                 model_detail = past_model
                 break
         if model_detail is None:
-            yield self.create_text_message(f"Version {version_id} of model {model_name_human} not found.")
-            return
+            raise ToolProviderCredentialValidationError(
+                f"Version {version_id} of model {model_name_human} not found.")
         model_filenames = [file["name"] for file in model_detail["files"]]
 
         draw_options["11"]["inputs"]["model_id"] = model_id
