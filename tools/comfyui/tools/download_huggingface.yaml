@@ -16,39 +16,39 @@ parameters:
     label:
       en_US: Repository ID
       zh_Hans: Repository ID
-      ja_JP: Repository ID
+      ja_JP: レポジトリ ID
     llm_description: Repository ID
     type: string
     human_description:
       en_US: Repository ID
       zh_Hans: Repository ID
-      ja_JP: Repository ID
+      ja_JP: レポジトリ ID
     required: true
   - name: filename
     form: llm
     label:
       en_US: Filename
-      zh_Hans: Filename
-      ja_JP: Filename
+      zh_Hans: 文件名
+      ja_JP: ファイル名
     llm_description: Filename
     type: string
     human_description:
-      en_US: Filename
-      zh_Hans: Filename
-      ja_JP: Filename
+      en_US: Name of file to download
+      zh_Hans: 文件名
+      ja_JP: ファイル名
     required: true
   - name: save_dir
     form: form
     label:
       en_US: Save Directory
-      zh_Hans: Save Directory
-      ja_JP: Save Directory
+      zh_Hans: 目的地目录
+      ja_JP: 保存先ディレクトリ
     llm_description: Save Directory
     type: select
     human_description:
-      en_US: Save Directory
-      zh_Hans: Save Directory
-      ja_JP: Save Directory
+      en_US: Directory to save the downloaded file in
+      zh_Hans: 保存下载文件的目录
+      ja_JP: ダウンロードしたファイルの保存先ディレクトリ
     options:
       - value: checkpoints
         label:
@@ -95,3 +95,5 @@ output_schema:
       type: string
       label:
         en_US: Filename
+        zh_Hans: 文件名
+        ja_JP: ファイル名
