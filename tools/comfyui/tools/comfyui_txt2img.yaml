@@ -73,30 +73,6 @@ parameters:
     name: model_type
     required: true
     type: string
-  - form: form
-    human_description:
-      en_US: Lora 1
-      pt_BR: Lora 1
-      zh_Hans: Lora 1
-    label:
-      en_US: Lora 1
-      pt_BR: Lora 1
-      zh_Hans: Lora 1
-    name: lora_1
-    required: false
-    type: string
-  - form: form
-    human_description:
-      en_US: Lora Strength 1
-      pt_BR: Lora Strength 1
-      zh_Hans: Lora模型的权重
-    label:
-      en_US: Lora Strength 1
-      pt_BR: Lora Strength 1
-      zh_Hans: Lora Strength 1
-    name: lora_strength_1
-    required: false
-    type: number
   - default: 20
     form: llm
     human_description:
@@ -202,51 +178,33 @@ parameters:
     name: scheduler
     required: false
     type: string
-  - form: form
+
+  - name: lora_names
+    form: llm
     human_description:
-      en_US: Lora 2
-      pt_BR: Lora 2
-      zh_Hans: Lora 2
+      en_US: LORAs
+      pt_BR: LORAs
+      zh_Hans: LORAs
+      ja_JP: LORAs
     label:
-      en_US: Lora 2
-      pt_BR: Lora 2
-      zh_Hans: Lora 2
-    name: lora_2
+      en_US: LORAs
+      pt_BR: LORAs
+      zh_Hans: LORAs
+      ja_JP: LORAs
     required: false
     type: string
-  - form: form
+
+  - name: lora_strengths
+    form: llm
     human_description:
-      en_US: Lora Strength 2
-      pt_BR: Lora Strength 2
-      zh_Hans: Lora模型的权重
+      en_US: LORAs strength
+      pt_BR: LORAs strength
+      zh_Hans: LORAs strength
+      ja_JP: LORAs strength
     label:
-      en_US: Lora Strength 2
-      pt_BR: Lora Strength 2
-      zh_Hans: Lora Strength 2
-    name: lora_strength_2
-    required: false
-    type: number
-  - form: form
-    human_description:
-      en_US: Lora 3
-      pt_BR: Lora 3
-      zh_Hans: Lora 3
-    label:
-      en_US: Lora 3
-      pt_BR: Lora 3
-      zh_Hans: Lora 3
-    name: lora_3
+      en_US: LORAs strength
+      pt_BR: LORAs strength
+      zh_Hans: LORAs strength
+      ja_JP: LORAs strength
     required: false
     type: string
-  - form: form
-    human_description:
-      en_US: Lora Strength 3
-      pt_BR: Lora Strength 3
-      zh_Hans: Lora模型的权重
-    label:
-      en_US: Lora Strength 3
-      pt_BR: Lora Strength 3
-      zh_Hans: Lora Strength 3
-    name: lora_strength_3
-    required: false
-    type: number
