@@ -1,19 +1,12 @@
 import json
 import os
 import uuid
-from copy import deepcopy
-from enum import Enum
 from typing import Any, Generator
-from dify_plugin.entities.tool import (
-    ToolInvokeMessage,
-    ToolParameter,
-    ToolParameterOption,
-    I18nObject,
-)
+from dify_plugin.entities.tool import ToolInvokeMessage
+
 from dify_plugin import Tool
 
-import httpx
-from tools.comfyui_client import ComfyUiClient, FileType
+from tools.comfyui_client import ComfyUiClient
 
 
 class DownloadHuggingFace(Tool):
