@@ -37,17 +37,17 @@ class DownloadCivitAI(Tool):
         try:
             model_data = httpx.get(
                 f"https://civitai.com/api/v1/models/{model_id}").json()
+            model_name_human = model_data["name"]
         except:
             yield self.create_text_message(f"Model {model_id} not found.")
             return
-        model_name = model_data["name"]
         model_detail = None
         for past_model in model_data["modelVersions"]:
             if past_model["id"] == version_id:
                 model_detail = past_model
                 break
         if model_detail is None:
-            yield self.create_text_message(f"Version {version_id} of model {model_name} not found.")
+            yield self.create_text_message(f"Version {version_id} of model {model_name_human} not found.")
             return
         model_filenames = [file["name"] for file in model_detail["files"]]
 
@@ -59,8 +59,8 @@ class DownloadCivitAI(Tool):
         try:
             client_id = str(uuid.uuid4())
             self.comfyui.queue_prompt_image(client_id, prompt=draw_options)
-            yield self.create_variable_message("model_name", model_name)
-            yield self.create_variable_message("model_filename", model_filenames[0])
+            yield self.create_variable_message("model_name_human", model_name_human)
+            yield self.create_variable_message("model_name", model_filenames[0])
         except Exception as e:
             yield self.create_text_message(
                 f"Failed to generate image: {str(e)}. Maybe install https://github.com/ciri/comfyui-model-downloader on ComfyUI"

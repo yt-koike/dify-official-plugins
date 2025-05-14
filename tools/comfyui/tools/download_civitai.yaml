@@ -91,13 +91,13 @@ parameters:
 output_schema:
   type: object
   properties:
-    model_name:
+    model_name_human:
       type: string
       label:
         en_US: Model Name
         zh_Hans: Model Name
         ja_JP: Model Name
-    model_filename:
+    model_name:
       type: string
       label:
         en_US: Model Filename
