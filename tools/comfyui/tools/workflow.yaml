@@ -6,7 +6,7 @@ description:
   llm: Run ComfyUI workflow.
 extra:
   python:
-    source: tools/comfyui_workflow.py
+    source: tools/workflow.py
 identity:
   author: hjlarry
   label:
