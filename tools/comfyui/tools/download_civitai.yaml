@@ -36,7 +36,7 @@ parameters:
       en_US: Version ID
       zh_Hans: 版本 ID
       ja_JP: バージョン ID
-    required: true
+    required: false
   - name: save_dir
     form: form
     label:

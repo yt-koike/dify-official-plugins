@@ -20,28 +20,29 @@ class DownloadCivitAI(Tool):
         """
         base_url = self.runtime.credentials.get("base_url", "")
         if not base_url:
-            raise ToolProviderCredentialValidationError(
-                "Please input base_url")
+            raise ToolProviderCredentialValidationError("Please input base_url")
         civitai_api_key = self.runtime.credentials.get("civitai_api_key", "")
         if not civitai_api_key:
-            raise ToolProviderCredentialValidationError(
-                "Please input civitai_api_key")
+            raise ToolProviderCredentialValidationError("Please input civitai_api_key")
         self.comfyui = ComfyUiClient(base_url)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(current_dir, "download_civitai.json")) as file:
             draw_options = json.loads(file.read())
 
-        model_id = tool_parameters.get("model_id", "")
-        version_id = tool_parameters.get("version_id", "")
-        save_dir = tool_parameters.get("save_dir", "")
+        model_id = tool_parameters.get("model_id")
+        version_id = tool_parameters.get("version_id")
+        save_dir = tool_parameters.get("save_dir")
         try:
             model_data = httpx.get(
-                f"https://civitai.com/api/v1/models/{model_id}").json()
+                f"https://civitai.com/api/v1/models/{model_id}"
+            ).json()
             model_name_human = model_data["name"]
         except:
-            raise ToolProviderCredentialValidationError(
-                f"Model {model_id} not found.")
+            raise ToolProviderCredentialValidationError(f"Model {model_id} not found.")
+        if version_id is None:
+            version_ids = [v["id"] for v in model_data["modelVersions"]]
+            version_id = max(version_ids)
         model_detail = None
         for past_model in model_data["modelVersions"]:
             if past_model["id"] == version_id:
@@ -49,7 +50,8 @@ class DownloadCivitAI(Tool):
                 break
         if model_detail is None:
             raise ToolProviderCredentialValidationError(
-                f"Version {version_id} of model {model_name_human} not found.")
+                f"Version {version_id} of model {model_name_human} not found."
+            )
         model_filenames = [file["name"] for file in model_detail["files"]]
 
         draw_options["11"]["inputs"]["model_id"] = model_id
