@@ -19,11 +19,11 @@ class DownloadCivitAI(Tool):
         """
         invoke tools
         """
-        base_url = self.runtime.credentials.get("base_url", "")
-        if not base_url:
+        base_url = self.runtime.credentials.get("base_url")
+        if base_url is None:
             raise ToolProviderCredentialValidationError("Please input base_url")
-        civitai_api_key = self.runtime.credentials.get("civitai_api_key", "")
-        if not civitai_api_key:
+        civitai_api_key = self.runtime.credentials.get("civitai_api_key")
+        if civitai_api_key is None:
             raise ToolProviderCredentialValidationError("Please input civitai_api_key")
         self.comfyui = ComfyUiClient(base_url)
 
