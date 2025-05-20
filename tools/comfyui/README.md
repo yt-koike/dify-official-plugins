@@ -117,8 +117,8 @@ These two IDs are shown as AIR(see the highlited area on the image below).
 
 ![](_assets/AIR.jpg)
 
-You need to install https://github.com/ciri/comfyui-model-downloader to ComfyUI in advance.
+You need to install https://github.com/ServiceStack/comfy-asset-downloader to ComfyUI in advance.
 
 ### Hugging Face Download
 Hugging Face Download can download models from [Hugging Face](https://huggingface.co/).
-You need to install https://github.com/ciri/comfyui-model-downloader to ComfyUI in advance.
+You need to install https://github.com/ServiceStack/comfy-asset-downloader to ComfyUI in advance.
