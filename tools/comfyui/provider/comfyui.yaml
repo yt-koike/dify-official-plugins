@@ -34,6 +34,7 @@ identity:
   tags:
   - image
 tools:
+<<<<<<< HEAD
 - tools/workflow.yaml
 - tools/txt2img.yaml
 - tools/img2img.yaml
@@ -45,5 +46,18 @@ tools:
 - tools/list_models.yaml
 - tools/list_samplers.yaml
 - tools/image_info.yaml
+=======
+- tools/comfyui_workflow.yaml
+- tools/comfyui_txt2img.yaml
+- tools/comfyui_img2img.yaml
+- tools/comfyui_img2vid.yaml
+- tools/comfyui_upscale.yaml
+- tools/comfyui_depth_anything.yaml
+- tools/comfyui_depth_pro.yaml
+- tools/comfyui_face_swap.yaml
+- tools/comfyui_list_models.yaml
+- tools/comfyui_list_samplers.yaml
+- tools/comfyui_image_info.yaml
+>>>>>>> ca6fd93a4cedca68e434bac735434daf97333cf5
 - tools/download_civitai.yaml
 - tools/download_huggingface.yaml

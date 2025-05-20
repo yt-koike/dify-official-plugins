@@ -18,12 +18,14 @@ class DownloadCivitAI(Tool):
         """
         invoke tools
         """
-        base_url = self.runtime.credentials.get("base_url", "")
-        if not base_url:
-            raise ToolProviderCredentialValidationError("Please input base_url")
-        civitai_api_key = self.runtime.credentials.get("civitai_api_key", "")
-        if not civitai_api_key:
-            raise ToolProviderCredentialValidationError("Please input civitai_api_key")
+        base_url = self.runtime.credentials.get("base_url")
+        if base_url is None:
+            raise ToolProviderCredentialValidationError(
+                "Please input base_url")
+        civitai_api_key = self.runtime.credentials.get("civitai_api_key")
+        if civitai_api_key is None:
+            raise ToolProviderCredentialValidationError(
+                "Please input civitai_api_key")
         self.comfyui = ComfyUiClient(base_url)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -39,7 +41,8 @@ class DownloadCivitAI(Tool):
             ).json()
             model_name_human = model_data["name"]
         except:
-            raise ToolProviderCredentialValidationError(f"Model {model_id} not found.")
+            raise ToolProviderCredentialValidationError(
+                f"Model {model_id} not found.")
         if version_id is None:
             version_ids = [v["id"] for v in model_data["modelVersions"]]
             version_id = max(version_ids)
