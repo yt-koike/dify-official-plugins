@@ -18,6 +18,15 @@ credentials_for_provider:
       zh_Hans: 请输入你的 CivitAI API Key
     required: false
     type: text-input
+  hf_api_key:
+    label:
+      en_US: Hugging Face API Key
+      zh_Hans: Hugging Face API Key
+    placeholder:
+      en_US: Please input your Hugging Face API Key
+      zh_Hans: 请输入你的 Hugging Face API Key
+    required: false
+    type: text-input
 extra:
   python:
     source: provider/comfyui.py

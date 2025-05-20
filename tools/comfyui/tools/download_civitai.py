@@ -7,6 +7,7 @@ from dify_plugin.entities.tool import ToolInvokeMessage
 from dify_plugin import Tool
 
 import httpx
+import requests
 from tools.comfyui_client import ComfyUiClient
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 
@@ -27,7 +28,7 @@ class DownloadCivitAI(Tool):
         self.comfyui = ComfyUiClient(base_url)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(current_dir, "download_civitai.json")) as file:
+        with open(os.path.join(current_dir, "download.json")) as file:
             draw_options = json.loads(file.read())
 
         model_id = tool_parameters.get("model_id")
@@ -40,6 +41,8 @@ class DownloadCivitAI(Tool):
             model_name_human = model_data["name"]
         except:
             raise ToolProviderCredentialValidationError(f"Model {model_id} not found.")
+        if "error" in model_data:
+            raise ToolProviderCredentialValidationError(model_data["error"])
         if version_id is None:
             version_ids = [v["id"] for v in model_data["modelVersions"]]
             version_id = max(version_ids)
@@ -54,10 +57,21 @@ class DownloadCivitAI(Tool):
             )
         model_filenames = [file["name"] for file in model_detail["files"]]
 
-        draw_options["11"]["inputs"]["model_id"] = model_id
-        draw_options["11"]["inputs"]["version_id"] = version_id
-        draw_options["11"]["inputs"]["token_id"] = civitai_api_key
-        draw_options["11"]["inputs"]["save_dir"] = save_dir
+        draw_options["1"]["inputs"][
+            "url"
+        ] = f"https://civitai.com/api/download/models/{model_id}"
+        draw_options["1"]["inputs"]["filename"] = model_filenames[0].split("/")[-1]
+        draw_options["1"]["inputs"]["token"] = civitai_api_key
+        draw_options["1"]["inputs"]["save_to"] = save_dir
+
+        response = requests.head(
+            draw_options["1"]["inputs"]["url"],
+            headers={"Authorization": f"Bearer {civitai_api_key}"},
+        )
+        if response.status_code >= 400:
+            raise ToolProviderCredentialValidationError(
+                "Fetch failed. Please check URL and api_token."
+            )
 
         try:
             client_id = str(uuid.uuid4())
