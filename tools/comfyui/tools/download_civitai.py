@@ -70,7 +70,7 @@ class DownloadCivitAI(Tool):
         )
         if response.status_code >= 400:
             raise ToolProviderCredentialValidationError(
-                "Fetch failed. Please check URL and api_token."
+                "Download failed. Please check URL and api_token."
             )
 
         try:
@@ -80,5 +80,5 @@ class DownloadCivitAI(Tool):
             yield self.create_variable_message("model_name", model_filenames[0])
         except Exception as e:
             raise ToolProviderCredentialValidationError(
-                f"Failed to generate image: {str(e)}. Maybe install https://github.com/ciri/comfyui-model-downloader on ComfyUI"
+                f"Failed to download: {str(e)}. Maybe install https://github.com/ServiceStack/comfy-asset-downloader on ComfyUI"
             )
