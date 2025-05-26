@@ -270,6 +270,7 @@ class ComfyUiClient:
             ws, client_id = self.open_websocket_connection()
             prompt_id = self.queue_prompt(client_id, prompt)
             self.track_progress(prompt, ws, prompt_id)
+            ws.close()
             history = self.get_history(prompt_id)
             images = []
             for output in history["outputs"].values():
@@ -285,8 +286,8 @@ class ComfyUiClient:
                         }
                     )
             return images
-        finally:
-            ws.close()
+        except Exception as e:
+            raise Exception("Failed to generate image")
 
     def queue_prompt_image(self, client_id, prompt):
         """
