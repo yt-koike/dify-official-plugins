@@ -21,10 +21,12 @@ class DownloadCivitAI(Tool):
         """
         base_url = self.runtime.credentials.get("base_url")
         if base_url is None:
-            raise ToolProviderCredentialValidationError("Please input base_url")
+            raise ToolProviderCredentialValidationError(
+                "Please input base_url")
         civitai_api_key = self.runtime.credentials.get("civitai_api_key")
         if civitai_api_key is None:
-            raise ToolProviderCredentialValidationError("Please input civitai_api_key")
+            raise ToolProviderCredentialValidationError(
+                "Please input civitai_api_key")
         self.comfyui = ComfyUiClient(base_url)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -40,7 +42,8 @@ class DownloadCivitAI(Tool):
             ).json()
             model_name_human = model_data["name"]
         except:
-            raise ToolProviderCredentialValidationError(f"Model {model_id} not found.")
+            raise ToolProviderCredentialValidationError(
+                f"Model {model_id} not found.")
         if "error" in model_data:
             raise ToolProviderCredentialValidationError(model_data["error"])
         if version_id is None:
@@ -60,7 +63,8 @@ class DownloadCivitAI(Tool):
         draw_options["1"]["inputs"][
             "url"
         ] = f"https://civitai.com/api/download/models/{model_id}"
-        draw_options["1"]["inputs"]["filename"] = model_filenames[0].split("/")[-1]
+        draw_options["1"]["inputs"]["filename"] = model_filenames[0].split(
+            "/")[-1]
         draw_options["1"]["inputs"]["token"] = civitai_api_key
         draw_options["1"]["inputs"]["save_to"] = save_dir
 
@@ -80,5 +84,5 @@ class DownloadCivitAI(Tool):
             yield self.create_variable_message("model_name", model_filenames[0])
         except Exception as e:
             raise ToolProviderCredentialValidationError(
-                f"Failed to download: {str(e)}. Maybe install https://github.com/ServiceStack/comfy-asset-downloader on ComfyUI"
+                f"Failed to download: {str(e)}. Please make sure https://github.com/ServiceStack/comfy-asset-downloader works on ComfyUI"
             )

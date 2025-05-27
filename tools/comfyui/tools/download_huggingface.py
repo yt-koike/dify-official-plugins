@@ -23,7 +23,8 @@ class DownloadHuggingFace(Tool):
             yield self.create_text_message("Please input base_url")
         hf_api_key = self.runtime.credentials.get("hf_api_key")
         if hf_api_key is None:
-            raise ToolProviderCredentialValidationError("Please input hf_api_key")
+            raise ToolProviderCredentialValidationError(
+                "Please input hf_api_key")
 
         self.comfyui = ComfyUiClient(base_url)
 
@@ -57,5 +58,5 @@ class DownloadHuggingFace(Tool):
             yield self.create_variable_message("filename", filename)
         except Exception as e:
             raise ToolProviderCredentialValidationError(
-                f"Failed to download: {str(e)}. Maybe install https://github.com/ServiceStack/comfy-asset-downloader on ComfyUI"
+                f"Failed to download: {str(e)}. Please make sure https://github.com/ServiceStack/comfy-asset-downloader works on ComfyUI"
             )
