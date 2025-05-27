@@ -210,7 +210,7 @@ class ComfyUiClient:
             raise Exception("Not a valid seed node")
         return prompt
 
-    def track_progress(self, prompt: dict, ws: WebSocket, prompt_id: str):
+    def wait_until_generation(self, prompt: dict, ws: WebSocket, prompt_id: str):
         node_ids = list(prompt.keys())
         finished_nodes = []
 
@@ -249,8 +249,6 @@ class ComfyUiClient:
 
                     if data["node"] is None and data["prompt_id"] == prompt_id:
                         break  # Execution is done
-            else:
-                continue
 
     def download_image(self, filename, subfolder, folder_type):
         """
@@ -269,25 +267,25 @@ class ComfyUiClient:
         try:
             ws, client_id = self.open_websocket_connection()
             prompt_id = self.queue_prompt(client_id, prompt)
-            self.track_progress(prompt, ws, prompt_id)
+            self.wait_until_generation(prompt, ws, prompt_id)
             ws.close()
-            history = self.get_history(prompt_id)
-            images = []
-            for output in history["outputs"].values():
-                for img in output.get("images", []):
-                    image_data = self.get_image(
-                        img["filename"], img["subfolder"], img["type"]
-                    )
-                    images.append(
-                        {
-                            "data": image_data,
-                            "filename": img["filename"],
-                            "type": img["type"],
-                        }
-                    )
-            return images
         except Exception as e:
             raise Exception("Failed to generate image")
+        history = self.get_history(prompt_id)
+        images = []
+        for output in history["outputs"].values():
+            for img in output.get("images", []):
+                image_data = self.get_image(
+                    img["filename"], img["subfolder"], img["type"]
+                )
+                images.append(
+                    {
+                        "data": image_data,
+                        "filename": img["filename"],
+                        "type": img["type"],
+                    }
+                )
+        return images
 
     def queue_prompt_image(self, client_id, prompt):
         """

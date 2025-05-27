@@ -33,7 +33,7 @@ class ComfyuiDepthPro(Tool):
             image_names.append(image_name)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(current_dir, "comfyui_depth_pro.json")) as file:
+        with open(os.path.join(current_dir, "depth_pro.json")) as file:
             draw_options = json.load(file)
         draw_options["6"]["inputs"]["precision"] = precision
         draw_options["8"]["inputs"]["image"] = image_names[0]
