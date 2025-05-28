@@ -62,7 +62,7 @@ class DownloadCivitAI(Tool):
 
         draw_options["1"]["inputs"][
             "url"
-        ] = f"https://civitai.com/api/download/models/{model_id}"
+        ] = f"https://civitai.com/api/download/models/{version_id}"
         draw_options["1"]["inputs"]["filename"] = model_filenames[0].split(
             "/")[-1]
         draw_options["1"]["inputs"]["token"] = civitai_api_key
