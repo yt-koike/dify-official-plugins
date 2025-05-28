@@ -115,7 +115,7 @@ class ComfyUiClient:
         )
         return response.content
 
-    def post_image(
+    def upload_image(
         self,
         filename: str,
         fileblob: bytes,

@@ -28,7 +28,7 @@ class ComfyuiDepthPro(Tool):
         for image in images:
             if image.type != FileType.IMAGE:
                 continue
-            image_name = self.comfyui.post_image(
+            image_name = self.comfyui.upload_image(
                 image.filename, image.blob, image.mime_type)
             image_names.append(image_name)
 
