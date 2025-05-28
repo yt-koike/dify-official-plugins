@@ -49,7 +49,7 @@ class ComfyuiFaceSwap(Tool):
                 "Please input two images")
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(current_dir, "face_swap.json")) as file:
+        with open(os.path.join(current_dir, "json", "face_swap.json")) as file:
             draw_options = json.loads(file.read())
 
         draw_options["15"]["inputs"]["image"] = image_names[0]

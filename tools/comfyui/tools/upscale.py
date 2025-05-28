@@ -64,7 +64,7 @@ class ComfyuiUpscaler(Tool):
 
         if not SD_UPSCALE_OPTIONS:
             current_dir = os.path.dirname(os.path.realpath(__file__))
-            with open(os.path.join(current_dir, "upscale.json")) as file:
+            with open(os.path.join(current_dir, "json", "upscale.json")) as file:
                 SD_UPSCALE_OPTIONS.update(json.load(file))
         draw_options = deepcopy(SD_UPSCALE_OPTIONS)
         draw_options["13"]["inputs"]["ckpt_name"] = model

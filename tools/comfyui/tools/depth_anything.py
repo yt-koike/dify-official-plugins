@@ -35,7 +35,7 @@ class ComfyuiDepthAnything(Tool):
             image_names.append(image_name)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(current_dir, "depth_anything.json")) as file:
+        with open(os.path.join(current_dir, "json", "depth_anything.json")) as file:
             draw_options = json.load(file)
         draw_options["2"]["inputs"]["model"] = model
         draw_options["3"]["inputs"]["image"] = image_names[0]

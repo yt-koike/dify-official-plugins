@@ -30,7 +30,7 @@ class DownloadCivitAI(Tool):
         self.comfyui = ComfyUiClient(base_url)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(current_dir, "download.json")) as file:
+        with open(os.path.join(current_dir, "json", "download.json")) as file:
             draw_options = json.loads(file.read())
 
         model_id = tool_parameters.get("model_id")

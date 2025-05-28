@@ -141,7 +141,7 @@ class ComfyuiImg2Img(Tool):
         """
         if not SD_TXT2IMG_OPTIONS:
             current_dir = os.path.dirname(os.path.realpath(__file__))
-            with open(os.path.join(current_dir, "img2img.json")) as file:
+            with open(os.path.join(current_dir, "json", "img2img.json")) as file:
                 SD_TXT2IMG_OPTIONS.update(json.load(file))
         draw_options = deepcopy(SD_TXT2IMG_OPTIONS)
         sampler_node = draw_options["3"]
