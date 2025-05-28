@@ -1,7 +1,6 @@
 import json
 import os
 import random
-import uuid
 from copy import deepcopy
 from enum import Enum
 from typing import Any, Generator
@@ -179,14 +178,19 @@ class ComfyuiTxt2Img(Tool):
             workflow_json[last_node_id] = deepcopy(FluxGuidanceNode)
             workflow_json[last_node_id]["inputs"]["conditioning"][0] = "6"
             workflow_json["3"]["inputs"]["positive"][0] = last_node_id
+
         try:
-            image = self.comfyui.generate(workflow_json)[0]
+            output_images = self.comfyui.generate_image_by_prompt(
+                workflow_json)
         except Exception as e:
-            yield self.create_text_message(f"Failed to generate image: {str(e)}")
-        yield self.create_blob_message(
-            blob=image,
-            meta={"mime_type": "image/png"},
-        )
+            raise ToolProviderCredentialValidationError(
+                f"Failed to generate image: {str(e)}")
+        for img in output_images:
+            yield self.create_blob_message(
+                blob=img["data"],
+                meta={"filename": img["filename"], "mime_type": mimetypes.guess_type(
+                    img["filename"])[0] or "image/png"},
+            )
 
     def get_runtime_parameters(self) -> list[ToolParameter]:
         parameters = [

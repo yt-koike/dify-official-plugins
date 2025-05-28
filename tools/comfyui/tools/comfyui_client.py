@@ -263,11 +263,11 @@ class ComfyUiClient:
         )
         return response.content
 
-    def generate_image_by_prompt(self, prompt: dict) -> list[dict[str, str | bytes]]:
+    def generate_image_by_prompt(self, workflow_json: dict) -> list[dict]:
         try:
             ws, client_id = self.open_websocket_connection()
-            prompt_id = self.queue_prompt(client_id, prompt)
-            self.wait_until_generation(prompt, ws, prompt_id)
+            prompt_id = self.queue_prompt(client_id, workflow_json)
+            self.wait_until_generation(workflow_json, ws, prompt_id)
             ws.close()
         except Exception as e:
             raise Exception("Failed to generate image")
@@ -338,13 +338,3 @@ class ComfyUiClient:
                     output_images[node_id] = images_output
         ws.close()
         return output_images
-
-    def generate(self, workflow_json) -> list[bytes]:
-        client_id = str(uuid.uuid4())
-        result = self.queue_prompt_image(client_id, workflow_json)
-        images = []
-        for node in result:
-            for img in result[node]:
-                if img:
-                    images.append(img)
-        return images

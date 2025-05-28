@@ -1,14 +1,10 @@
 import json
+import mimetypes
 import os
-import uuid
-from copy import deepcopy
 from enum import Enum
 from typing import Any, Generator
 from dify_plugin.entities.tool import (
     ToolInvokeMessage,
-    ToolParameter,
-    ToolParameterOption,
-    I18nObject,
 )
 from dify_plugin import Tool
 
@@ -50,26 +46,20 @@ class ComfyuiFaceSwap(Tool):
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(current_dir, "json", "face_swap.json")) as file:
-            draw_options = json.loads(file.read())
+            workflow_json = json.loads(file.read())
 
-        draw_options["15"]["inputs"]["image"] = image_names[0]
-        draw_options["22"]["inputs"]["image"] = image_names[1]
+        workflow_json["15"]["inputs"]["image"] = image_names[0]
+        workflow_json["22"]["inputs"]["image"] = image_names[1]
 
         try:
-            client_id = str(uuid.uuid4())
-            result = self.comfyui.queue_prompt_image(
-                client_id, prompt=draw_options)
-            image = b""
-            for node in result:
-                for img in result[node]:
-                    if img:
-                        image = img
-                        break
-            yield self.create_blob_message(
-                blob=image,
-                meta={"mime_type": "image/png"},
-            )
+            output_images = self.comfyui.generate_image_by_prompt(
+                workflow_json)
         except Exception as e:
-            yield self.create_text_message(
-                f"Failed to generate image: {str(e)}. Maybe install https://github.com/Gourieff/ComfyUI-ReActor on ComfyUI"
+            raise ToolProviderCredentialValidationError(
+                f"Failed to generate image: {str(e)}. Maybe install https://github.com/Gourieff/ComfyUI-ReActor on ComfyUI")
+        for img in output_images:
+            yield self.create_blob_message(
+                blob=img["data"],
+                meta={"filename": img["filename"], "mime_type": mimetypes.guess_type(
+                    img["filename"])[0] or "image/png"},
             )

@@ -1,15 +1,13 @@
 import json
+import mimetypes
 import os
 import random
-import uuid
 from copy import deepcopy
 from enum import Enum
 from typing import Any, Generator
 from dify_plugin.entities.tool import (
     ToolInvokeMessage,
-    ToolParameter,
-    ToolParameterOption,
-    I18nObject,
+
 )
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 from dify_plugin import Tool
@@ -182,10 +180,14 @@ class ComfyuiImg2Img(Tool):
             negative_prompt_node["inputs"]["clip"][0] = str(lora_end_id)
 
         try:
-            image = self.comfyui.generate(workflow_json)[0]
+            output_images = self.comfyui.generate_image_by_prompt(
+                workflow_json)
         except Exception as e:
-            yield self.create_text_message(f"Failed to generate image: {str(e)}")
-        yield self.create_blob_message(
-            blob=image,
-            meta={"mime_type": "image/png"},
-        )
+            raise ToolProviderCredentialValidationError(
+                f"Failed to generate image: {str(e)}")
+        for img in output_images:
+            yield self.create_blob_message(
+                blob=img["data"],
+                meta={"filename": img["filename"], "mime_type": mimetypes.guess_type(
+                    img["filename"])[0] or "image/png"},
+            )
