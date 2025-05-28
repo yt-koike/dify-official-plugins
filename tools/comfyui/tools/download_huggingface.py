@@ -55,8 +55,8 @@ class DownloadHuggingFace(Tool):
         try:
             client_id = str(uuid.uuid4())
             self.comfyui.queue_prompt_image(client_id, prompt=draw_options)
-            yield self.create_variable_message("filename", filename)
         except Exception as e:
             raise ToolProviderCredentialValidationError(
                 f"Failed to download: {str(e)}. Please make sure https://github.com/ServiceStack/comfy-asset-downloader works on ComfyUI"
             )
+        yield self.create_variable_message("filename", filename)

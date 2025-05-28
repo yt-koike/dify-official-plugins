@@ -338,3 +338,13 @@ class ComfyUiClient:
                     output_images[node_id] = images_output
         ws.close()
         return output_images
+
+    def generate(self, workflow_json) -> list[bytes]:
+        client_id = str(uuid.uuid4())
+        result = self.queue_prompt_image(client_id, workflow_json)
+        images = []
+        for node in result:
+            for img in result[node]:
+                if img:
+                    images.append(img)
+        return images

@@ -134,22 +134,22 @@ class ComfyuiTxt2Img(Tool):
             current_dir = os.path.dirname(os.path.realpath(__file__))
             with open(os.path.join(current_dir, "json", "txt2img.json")) as file:
                 SD_TXT2IMG_OPTIONS.update(json.load(file))
-        draw_options = deepcopy(SD_TXT2IMG_OPTIONS)
-        sampler_node = draw_options["3"]
-        prompt_node = draw_options["6"]
-        negative_prompt_node = draw_options["7"]
+        workflow_json = deepcopy(SD_TXT2IMG_OPTIONS)
+        sampler_node = workflow_json["3"]
+        prompt_node = workflow_json["6"]
+        negative_prompt_node = workflow_json["7"]
         sampler_node["inputs"]["steps"] = steps
         sampler_node["inputs"]["sampler_name"] = sampler_name
         sampler_node["inputs"]["scheduler"] = scheduler
         sampler_node["inputs"]["cfg"] = cfg
         sampler_node["inputs"]["seed"] = random.randint(0, 100000000)
-        draw_options["4"]["inputs"]["ckpt_name"] = model
-        draw_options["5"]["inputs"]["width"] = width
-        draw_options["5"]["inputs"]["height"] = height
+        workflow_json["4"]["inputs"]["ckpt_name"] = model
+        workflow_json["5"]["inputs"]["width"] = width
+        workflow_json["5"]["inputs"]["height"] = height
         prompt_node["inputs"]["text"] = prompt
         negative_prompt_node["inputs"]["text"] = negative_prompt
         if model_type in {ModelType.SD3.name, ModelType.FLUX.name}:
-            draw_options["5"]["class_type"] = "EmptySD3LatentImage"
+            workflow_json["5"]["class_type"] = "EmptySD3LatentImage"
 
         lora_start_id = 100
         lora_end_id = lora_start_id + len(lora_list) - 1
@@ -164,11 +164,11 @@ class ComfyuiTxt2Img(Tool):
             lora_node["inputs"]["strength_clip"] = strength
             lora_node["inputs"]["model"][0] = str(lora_start_id+i-1)
             lora_node["inputs"]["clip"][0] = str(lora_start_id+i-1)
-            draw_options[str(lora_start_id+i)] = lora_node
+            workflow_json[str(lora_start_id+i)] = lora_node
         if len(lora_list) > 0:
-            draw_options[str(
+            workflow_json[str(
                 lora_start_id)]["inputs"]["model"][0] = sampler_node["inputs"]["model"][0]
-            draw_options[str(
+            workflow_json[str(
                 lora_start_id)]["inputs"]["clip"][0] = prompt_node["inputs"]["clip"][0]
             sampler_node["inputs"]["model"][0] = str(lora_end_id)
             prompt_node["inputs"]["clip"][0] = str(lora_end_id)
@@ -176,25 +176,17 @@ class ComfyuiTxt2Img(Tool):
 
         if model_type == ModelType.FLUX.name:
             last_node_id = str(10 + len(lora_list))
-            draw_options[last_node_id] = deepcopy(FluxGuidanceNode)
-            draw_options[last_node_id]["inputs"]["conditioning"][0] = "6"
-            draw_options["3"]["inputs"]["positive"][0] = last_node_id
+            workflow_json[last_node_id] = deepcopy(FluxGuidanceNode)
+            workflow_json[last_node_id]["inputs"]["conditioning"][0] = "6"
+            workflow_json["3"]["inputs"]["positive"][0] = last_node_id
         try:
-            client_id = str(uuid.uuid4())
-            result = self.comfyui.queue_prompt_image(
-                client_id, prompt=draw_options)
-            image = b""
-            for node in result:
-                for img in result[node]:
-                    if img:
-                        image = img
-                        break
-            yield self.create_blob_message(
-                blob=image,
-                meta={"mime_type": "image/png"},
-            )
+            image = self.comfyui.generate(workflow_json)[0]
         except Exception as e:
             yield self.create_text_message(f"Failed to generate image: {str(e)}")
+        yield self.create_blob_message(
+            blob=image,
+            meta={"mime_type": "image/png"},
+        )
 
     def get_runtime_parameters(self) -> list[ToolParameter]:
         parameters = [

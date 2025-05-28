@@ -34,25 +34,17 @@ class ComfyuiDepthPro(Tool):
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(current_dir, "json", "depth_pro.json")) as file:
-            draw_options = json.load(file)
-        draw_options["6"]["inputs"]["precision"] = precision
-        draw_options["8"]["inputs"]["image"] = image_names[0]
+            workflow_json = json.load(file)
+        workflow_json["6"]["inputs"]["precision"] = precision
+        workflow_json["8"]["inputs"]["image"] = image_names[0]
 
         try:
-            client_id = str(uuid.uuid4())
-            result = self.comfyui.queue_prompt_image(
-                client_id, prompt=draw_options)
-            image = b""
-            for node in result:
-                for img in result[node]:
-                    if img:
-                        image = img
-                        break
-            yield self.create_blob_message(
-                blob=image,
-                meta={"mime_type": "image/png"},
-            )
+            image = self.comfyui.generate(workflow_json)[0]
         except Exception as e:
             raise ToolProviderCredentialValidationError(
                 f"Failed to generate image: {str(e)}. Maybe install https://github.com/spacepxl/ComfyUI-Depth-Pro on ComfyUI"
             )
+        yield self.create_blob_message(
+            blob=image,
+            meta={"mime_type": "image/png"},
+        )

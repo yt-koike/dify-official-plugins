@@ -143,10 +143,10 @@ class ComfyuiImg2Img(Tool):
             current_dir = os.path.dirname(os.path.realpath(__file__))
             with open(os.path.join(current_dir, "json", "img2img.json")) as file:
                 SD_TXT2IMG_OPTIONS.update(json.load(file))
-        draw_options = deepcopy(SD_TXT2IMG_OPTIONS)
-        sampler_node = draw_options["3"]
-        prompt_node = draw_options["6"]
-        negative_prompt_node = draw_options["7"]
+        workflow_json = deepcopy(SD_TXT2IMG_OPTIONS)
+        sampler_node = workflow_json["3"]
+        prompt_node = workflow_json["6"]
+        negative_prompt_node = workflow_json["7"]
         sampler_node["inputs"]["steps"] = steps
         sampler_node["inputs"]["sampler_name"] = sampler_name
         sampler_node["inputs"]["scheduler"] = scheduler
@@ -155,8 +155,8 @@ class ComfyuiImg2Img(Tool):
         sampler_node["inputs"]["seed"] = random.randint(0, 100000000)
         prompt_node["inputs"]["text"] = prompt
         negative_prompt_node["inputs"]["text"] = negative_prompt
-        draw_options["14"]["inputs"]["ckpt_name"] = model
-        draw_options["10"]["inputs"]["image"] = image_name
+        workflow_json["14"]["inputs"]["ckpt_name"] = model
+        workflow_json["10"]["inputs"]["image"] = image_name
 
         lora_start_id = 100
         lora_end_id = lora_start_id + len(lora_list) - 1
@@ -171,173 +171,21 @@ class ComfyuiImg2Img(Tool):
             lora_node["inputs"]["strength_clip"] = strength
             lora_node["inputs"]["model"][0] = str(lora_start_id+i-1)
             lora_node["inputs"]["clip"][0] = str(lora_start_id+i-1)
-            draw_options[str(lora_start_id+i)] = lora_node
+            workflow_json[str(lora_start_id+i)] = lora_node
         if len(lora_list) > 0:
-            draw_options[str(
+            workflow_json[str(
                 lora_start_id)]["inputs"]["model"][0] = sampler_node["inputs"]["model"][0]
-            draw_options[str(
+            workflow_json[str(
                 lora_start_id)]["inputs"]["clip"][0] = prompt_node["inputs"]["clip"][0]
             sampler_node["inputs"]["model"][0] = str(lora_end_id)
             prompt_node["inputs"]["clip"][0] = str(lora_end_id)
             negative_prompt_node["inputs"]["clip"][0] = str(lora_end_id)
 
         try:
-            client_id = str(uuid.uuid4())
-            result = self.comfyui.queue_prompt_image(
-                client_id, prompt=draw_options)
-            image = b""
-            for node in result:
-                for img in result[node]:
-                    if img:
-                        image = img
-                        break
-            yield self.create_blob_message(
-                blob=image,
-                meta={"mime_type": "image/png"},
-            )
+            image = self.comfyui.generate(workflow_json)[0]
         except Exception as e:
             yield self.create_text_message(f"Failed to generate image: {str(e)}")
-
-    def get_runtime_parameters(self) -> list[ToolParameter]:
-        parameters = [
-            ToolParameter(
-                name="prompt",
-                label=I18nObject(en_US="Prompt", zh_Hans="Prompt"),
-                human_description=I18nObject(
-                    en_US="Image prompt, you can check the official documentation of Stable Diffusion",
-                    zh_Hans="图像提示词，您可以查看 Stable Diffusion 的官方文档",
-                ),
-                type=ToolParameter.ToolParameterType.STRING,
-                form=ToolParameter.ToolParameterForm.LLM,
-                llm_description="Image prompt of Stable Diffusion, you should describe the image you want to generate as a list of words as possible as detailed, the prompt must be written in English.",
-                required=True,
-            )
-        ]
-        if self.runtime.credentials:
-            try:
-                models = self.comfyui.get_checkpoints()
-                if len(models) != 0:
-                    parameters.append(
-                        ToolParameter(
-                            name="model",
-                            label=I18nObject(en_US="Model", zh_Hans="Model"),
-                            human_description=I18nObject(
-                                en_US="Model of Stable Diffusion or FLUX, you can check the official documentation of Stable Diffusion or FLUX",
-                                zh_Hans="Stable Diffusion 或者 FLUX 的模型，您可以查看 Stable Diffusion 的官方文档",
-                            ),
-                            type=ToolParameter.ToolParameterType.SELECT,
-                            form=ToolParameter.ToolParameterForm.FORM,
-                            llm_description="Model of Stable Diffusion or FLUX, you can check the official documentation of Stable Diffusion or FLUX",
-                            required=True,
-                            default=models[0],
-                            options=[
-                                ToolParameterOption(
-                                    value=i, label=I18nObject(
-                                        en_US=i, zh_Hans=i)
-                                )
-                                for i in models
-                            ],
-                        )
-                    )
-                loras = self.comfyui.get_loras()
-                if len(loras) != 0:
-                    for n in range(1, 4):
-                        parameters.append(
-                            ToolParameter(
-                                name=f"lora_{n}",
-                                label=I18nObject(
-                                    en_US=f"Lora {n}", zh_Hans=f"Lora {n}"
-                                ),
-                                human_description=I18nObject(
-                                    en_US="Lora of Stable Diffusion, you can check the official documentation of Stable Diffusion",
-                                    zh_Hans="Stable Diffusion 的 Lora 模型，您可以查看 Stable Diffusion 的官方文档",
-                                ),
-                                type=ToolParameter.ToolParameterType.SELECT,
-                                form=ToolParameter.ToolParameterForm.FORM,
-                                llm_description="Lora of Stable Diffusion, you can check the official documentation of Stable Diffusion",
-                                required=False,
-                                options=[
-                                    ToolParameterOption(
-                                        value=i, label=I18nObject(
-                                            en_US=i, zh_Hans=i)
-                                    )
-                                    for i in loras
-                                ],
-                            )
-                        )
-                sample_methods = self.comfyui.get_samplers()
-                schedulers = self.comfyui.get_schedulers()
-                if len(sample_methods) != 0:
-                    parameters.append(
-                        ToolParameter(
-                            name="sampler_name",
-                            label=I18nObject(
-                                en_US="Sampling method", zh_Hans="Sampling method"
-                            ),
-                            human_description=I18nObject(
-                                en_US="Sampling method of Stable Diffusion, you can check the official documentation of Stable Diffusion",
-                                zh_Hans="Stable Diffusion 的Sampling method，您可以查看 Stable Diffusion 的官方文档",
-                            ),
-                            type=ToolParameter.ToolParameterType.SELECT,
-                            form=ToolParameter.ToolParameterForm.FORM,
-                            llm_description="Sampling method of Stable Diffusion, you can check the official documentation of Stable Diffusion",
-                            required=True,
-                            default=sample_methods[0],
-                            options=[
-                                ToolParameterOption(
-                                    value=i, label=I18nObject(
-                                        en_US=i, zh_Hans=i)
-                                )
-                                for i in sample_methods
-                            ],
-                        )
-                    )
-                if len(schedulers) != 0:
-                    parameters.append(
-                        ToolParameter(
-                            name="scheduler",
-                            label=I18nObject(
-                                en_US="Scheduler", zh_Hans="Scheduler"),
-                            human_description=I18nObject(
-                                en_US="Scheduler of Stable Diffusion, you can check the official documentation of Stable Diffusion",
-                                zh_Hans="Stable Diffusion 的Scheduler，您可以查看 Stable Diffusion 的官方文档",
-                            ),
-                            type=ToolParameter.ToolParameterType.SELECT,
-                            form=ToolParameter.ToolParameterForm.FORM,
-                            llm_description="Scheduler of Stable Diffusion, you can check the official documentation of Stable Diffusion",
-                            required=True,
-                            default=schedulers[0],
-                            options=[
-                                ToolParameterOption(
-                                    value=i, label=I18nObject(
-                                        en_US=i, zh_Hans=i)
-                                )
-                                for i in schedulers
-                            ],
-                        )
-                    )
-                parameters.append(
-                    ToolParameter(
-                        name="model_type",
-                        label=I18nObject(en_US="Model Type",
-                                         zh_Hans="Model Type"),
-                        human_description=I18nObject(
-                            en_US="Model Type of Stable Diffusion or Flux, you can check the official documentation of Stable Diffusion or Flux",
-                            zh_Hans="Stable Diffusion 或 FLUX 的模型类型，您可以查看 Stable Diffusion 或 Flux 的官方文档",
-                        ),
-                        type=ToolParameter.ToolParameterType.SELECT,
-                        form=ToolParameter.ToolParameterForm.FORM,
-                        llm_description="Model Type of Stable Diffusion or Flux, you can check the official documentation of Stable Diffusion or Flux",
-                        required=True,
-                        default=ModelType.SD15.name,
-                        options=[
-                            ToolParameterOption(
-                                value=i, label=I18nObject(en_US=i, zh_Hans=i)
-                            )
-                            for i in ModelType.__members__
-                        ],
-                    )
-                )
-            except:
-                pass
-        return parameters
+        yield self.create_blob_message(
+            blob=image,
+            meta={"mime_type": "image/png"},
+        )
