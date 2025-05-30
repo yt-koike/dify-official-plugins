@@ -6,6 +6,7 @@ from dify_plugin.entities.tool import ToolInvokeMessage
 
 from dify_plugin import Tool
 import requests
+import requests
 
 from tools.comfyui_client import ComfyUiClient
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
@@ -26,7 +27,10 @@ class DownloadHuggingFace(Tool):
             raise ToolProviderCredentialValidationError(
                 "Please input hf_api_key")
 
-        self.comfyui = ComfyUiClient(base_url)
+        self.comfyui = ComfyUiClient(
+            base_url,
+            self.runtime.credentials.get("comfyui_api_key")
+        )
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(current_dir, "json", "download.json")) as file:
@@ -36,6 +40,21 @@ class DownloadHuggingFace(Tool):
         filename = tool_parameters.get("filename", "")
         save_dir = tool_parameters.get("save_dir", "")
 
+        draw_options["1"]["inputs"][
+            "url"
+        ] = f"https://huggingface.co/{repo_id}/resolve/main/{filename}"
+        draw_options["1"]["inputs"]["filename"] = filename.split("/")[-1]
+        draw_options["1"]["inputs"]["token"] = hf_api_key
+        draw_options["1"]["inputs"]["save_to"] = save_dir
+
+        response = requests.head(
+            draw_options["1"]["inputs"]["url"],
+            headers={"Authorization": f"Bearer {hf_api_key}"},
+        )
+        if response.status_code >= 400:
+            raise ToolProviderCredentialValidationError(
+                "Download failed. Please check URL and api_token."
+            )
         draw_options["1"]["inputs"][
             "url"
         ] = f"https://huggingface.co/{repo_id}/resolve/main/{filename}"

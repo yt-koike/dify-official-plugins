@@ -8,6 +8,7 @@ from dify_plugin import Tool
 
 import httpx
 import requests
+import requests
 from tools.comfyui_client import ComfyUiClient
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 
@@ -36,53 +37,60 @@ class DownloadCivitAI(Tool):
         model_id = tool_parameters.get("model_id")
         version_id = tool_parameters.get("version_id")
         save_dir = tool_parameters.get("save_dir")
+        model_id = tool_parameters.get("model_id")
+        version_id = tool_parameters.get("version_id")
+        save_dir = tool_parameters.get("save_dir")
         try:
             model_data = httpx.get(
                 f"https://civitai.com/api/v1/models/{model_id}"
             ).json()
+              f"https://civitai.com/api/v1/models/{model_id}"
+            ).json()
             model_name_human = model_data["name"]
-        except:
-            raise ToolProviderCredentialValidationError(
-                f"Model {model_id} not found.")
-        if "error" in model_data:
-            raise ToolProviderCredentialValidationError(model_data["error"])
-        if version_id is None:
-            version_ids = [v["id"] for v in model_data["modelVersions"]]
-            version_id = max(version_ids)
-        model_detail = None
-        for past_model in model_data["modelVersions"]:
-            if past_model["id"] == version_id:
+                except:
+                raise ToolProviderCredentialValidationError(
+              f"Model {model_id} not found.")
+               if "error" in model_data:
+               raise ToolProviderCredentialValidationError(model_data["error"])
+               if version_id is None:
+               version_ids = [v["id"] for v in model_data["modelVersions"]]
+               version_id = max(version_ids)
+               model_detail = None
+               for past_model in model_data["modelVersions"]:
+               if past_model["id"] == version_id:
                 model_detail = past_model
-                break
-        if model_detail is None:
-            raise ToolProviderCredentialValidationError(
+               break
+               if model_detail is None:
+               raise ToolProviderCredentialValidationError(
+               f"Version {version_id} of model {model_name_human} not found."
+            )
                 f"Version {version_id} of model {model_name_human} not found."
             )
-        model_filenames = [file["name"] for file in model_detail["files"]]
+                model_filenames = [file["name"] for file in model_detail["files"]]
 
-        draw_options["1"]["inputs"][
-            "url"
-        ] = f"https://civitai.com/api/download/models/{version_id}"
-        draw_options["1"]["inputs"]["filename"] = model_filenames[0].split(
-            "/")[-1]
-        draw_options["1"]["inputs"]["token"] = civitai_api_key
-        draw_options["1"]["inputs"]["save_to"] = save_dir
+                draw_options["1"]["inputs"][
+                "url"
+                ] = f"https://civitai.com/api/download/models/{version_id}"
+            draw_options["1"]["inputs"]["filename"] = model_filenames[0].split(
+                "/")[-1]
+                draw_options["1"]["inputs"]["token"]= civitai_api_key
+                draw_options["1"]["inputs"]["save_to"]= save_dir
 
-        response = requests.head(
-            draw_options["1"]["inputs"]["url"],
-            headers={"Authorization": f"Bearer {civitai_api_key}"},
-        )
-        if response.status_code >= 400:
-            raise ToolProviderCredentialValidationError(
+                response= requests.head(
+                draw_options["1"]["inputs"]["url"],
+                headers={"Authorization": f"Bearer {civitai_api_key}"},
+                )
+                if response.status_code >= 400:
+                raise ToolProviderCredentialValidationError(
                 "Download failed. Please check URL and api_token."
-            )
+                )
 
-        try:
+                try:
             client_id = str(uuid.uuid4())
-            self.comfyui.queue_prompt_image(client_id, prompt=draw_options)
-        except Exception as e:
-            raise ToolProviderCredentialValidationError(
+                self.comfyui.queue_prompt_image(client_id, prompt=draw_options)
+                except Exception as e:
+                raise ToolProviderCredentialValidationError(
                 f"Failed to download: {str(e)}. Please make sure https://github.com/ServiceStack/comfy-asset-downloader works on ComfyUI"
-            )
-        yield self.create_variable_message("model_name_human", model_name_human)
-        yield self.create_variable_message("model_name", model_filenames[0])
+                )
+                yield self.create_variable_message("model_name_human", model_name_human)
+                yield self.create_variable_message("model_name", model_filenames[0])
