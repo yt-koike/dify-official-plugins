@@ -28,7 +28,7 @@ class ComfyuiDepthAnything(Tool):
         if not model:
             raise ToolProviderCredentialValidationError("Please input model")
 
-        images = tool_parameters.get("images") or []
+        images = tool_parameters.get("images", [])
         image_names = []
         for image in images:
             if image.type != FileType.IMAGE:

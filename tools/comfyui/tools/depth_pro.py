@@ -26,9 +26,8 @@ class ComfyuiDepthPro(Tool):
         if not precision:
             raise ToolProviderCredentialValidationError(
                 "Please input precision")
-        images = tool_parameters.get("images") or []
         image_names = []
-        for image in images:
+        for image in tool_parameters.get("images", []):
             if image.type != FileType.IMAGE:
                 continue
             image_name = self.comfyui.upload_image(

@@ -1,4 +1,5 @@
 import json
+import mimetypes
 import os
 import random
 from copy import deepcopy
