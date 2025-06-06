@@ -1,5 +1,6 @@
 from enum import StrEnum
 import json
+import mimetypes
 import random
 import uuid
 
@@ -306,7 +307,7 @@ class ComfyUiClient:
                     {
                         "data": image_data,
                         "filename": img["filename"],
-                        "mime_type": img["mime_type"],
+                        "mime_type": mimetypes.guess_type(img["filename"])[0],
                         "type": img["type"],
                     }
                 )
