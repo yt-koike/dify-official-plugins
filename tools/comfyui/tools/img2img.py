@@ -58,8 +58,7 @@ class ComfyuiImg2Img(Tool):
         if not model:
             raise ToolProviderCredentialValidationError("Please input model")
         if model not in self.comfyui.get_checkpoints():
-            raise ToolProviderCredentialValidationError(
-                f"model {model} does not exist")
+            raise ToolProviderCredentialValidationError(f"model {model} does not exist")
         prompt = tool_parameters.get("prompt", "")
         if not prompt:
             raise ToolProviderCredentialValidationError("Please input prompt")
@@ -85,11 +84,11 @@ class ComfyuiImg2Img(Tool):
             if image.type != FileType.IMAGE:
                 continue
             image_name = self.comfyui.upload_image(
-                image.filename, image.blob, image.mime_type)
+                image.filename, image.blob, image.mime_type
+            )
             image_names.append(image_name)
         if len(image_names) == 0:
-            raise ToolProviderCredentialValidationError(
-                "Please input images")
+            raise ToolProviderCredentialValidationError("Please input images")
 
         lora_list = []
         if len(tool_parameters.get("lora_names", "")) > 0:
@@ -99,11 +98,14 @@ class ComfyuiImg2Img(Tool):
         for lora in lora_list:
             if lora not in valid_loras:
                 raise ToolProviderCredentialValidationError(
-                    f"LORA {lora} does not exist.")
+                    f"LORA {lora} does not exist."
+                )
         lora_strength_list = []
         if len(tool_parameters.get("lora_strengths", "")) > 0:
-            lora_strength_list = [float(x.lstrip(" ").rstrip(" ")) for x in tool_parameters.get(
-                "lora_strengths").split(",")]
+            lora_strength_list = [
+                float(x.lstrip(" ").rstrip(" "))
+                for x in tool_parameters.get("lora_strengths").split(",")
+            ]
 
         yield from self.img2img(
             model=model,
@@ -167,28 +169,32 @@ class ComfyuiImg2Img(Tool):
             lora_node["inputs"]["lora_name"] = lora_name
             lora_node["inputs"]["strength_model"] = strength
             lora_node["inputs"]["strength_clip"] = strength
-            lora_node["inputs"]["model"][0] = str(lora_start_id+i-1)
-            lora_node["inputs"]["clip"][0] = str(lora_start_id+i-1)
-            workflow_json[str(lora_start_id+i)] = lora_node
+            lora_node["inputs"]["model"][0] = str(lora_start_id + i - 1)
+            lora_node["inputs"]["clip"][0] = str(lora_start_id + i - 1)
+            workflow_json[str(lora_start_id + i)] = lora_node
         if len(lora_list) > 0:
-            workflow_json[str(
-                lora_start_id)]["inputs"]["model"][0] = sampler_node["inputs"]["model"][0]
-            workflow_json[str(
-
-                lora_start_id)]["inputs"]["clip"][0] = prompt_node["inputs"]["clip"][0]
+            workflow_json[str(lora_start_id)]["inputs"]["model"][0] = sampler_node[
+                "inputs"
+            ]["model"][0]
+            workflow_json[str(lora_start_id)]["inputs"]["clip"][0] = prompt_node[
+                "inputs"
+            ]["clip"][0]
             sampler_node["inputs"]["model"][0] = str(lora_end_id)
             prompt_node["inputs"]["clip"][0] = str(lora_end_id)
             negative_prompt_node["inputs"]["clip"][0] = str(lora_end_id)
 
         try:
-            output_images = self.comfyui.generate_image_by_prompt(
-                workflow_json)
+            output_images = self.comfyui.generate(workflow_json)
         except Exception as e:
             raise ToolProviderCredentialValidationError(
-                f"Failed to generate image: {str(e)}")
+                f"Failed to generate image: {str(e)}"
+            )
         for img in output_images:
             yield self.create_blob_message(
                 blob=img["data"],
-                meta={"filename": img["filename"], "mime_type": mimetypes.guess_type(
-                    img["filename"])[0] or "image/png"},
+                meta={
+                    "filename": img["filename"],
+                    "mime_type": mimetypes.guess_type(img["filename"])[0]
+                    or "image/png",
+                },
             )

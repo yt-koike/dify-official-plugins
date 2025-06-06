@@ -38,11 +38,11 @@ class ComfyuiFaceSwap(Tool):
             if image.type != FileType.IMAGE:
                 continue
             image_name = self.comfyui.upload_image(
-                image.filename, image.blob, image.mime_type)
+                image.filename, image.blob, image.mime_type
+            )
             image_names.append(image_name)
         if len(image_names) <= 1:
-            raise ToolProviderCredentialValidationError(
-                "Please input two images")
+            raise ToolProviderCredentialValidationError("Please input two images")
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(current_dir, "json", "face_swap.json")) as file:
@@ -52,14 +52,17 @@ class ComfyuiFaceSwap(Tool):
         workflow_json["22"]["inputs"]["image"] = image_names[1]
 
         try:
-            output_images = self.comfyui.generate_image_by_prompt(
-                workflow_json)
+            output_images = self.comfyui.generate(workflow_json)
         except Exception as e:
             raise ToolProviderCredentialValidationError(
-                f"Failed to generate image: {str(e)}. Maybe install https://github.com/Gourieff/ComfyUI-ReActor on ComfyUI")
+                f"Failed to generate image: {str(e)}. Maybe install https://github.com/Gourieff/ComfyUI-ReActor on ComfyUI"
+            )
         for img in output_images:
             yield self.create_blob_message(
                 blob=img["data"],
-                meta={"filename": img["filename"], "mime_type": mimetypes.guess_type(
-                    img["filename"])[0] or "image/png"},
+                meta={
+                    "filename": img["filename"],
+                    "mime_type": mimetypes.guess_type(img["filename"])[0]
+                    or "image/png",
+                },
             )

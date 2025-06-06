@@ -22,8 +22,9 @@ class ComfyUIWorkflowTool(Tool):
     ) -> Generator[ToolInvokeMessage, None, None]:
         self.comfyui = ComfyUiClient(self.runtime.credentials["base_url"])
         images = tool_parameters.get("images") or []
-        workflow_json = json.loads(clean_json_string(
-            tool_parameters.get("workflow_json")))
+        workflow_json = json.loads(
+            clean_json_string(tool_parameters.get("workflow_json"))
+        )
         image_names = []
         for image in images:
             if image.type != FileType.IMAGE:
@@ -33,7 +34,8 @@ class ComfyUIWorkflowTool(Tool):
                 "overwrite": "true",
             }
             res = httpx.post(
-                str(self.comfyui.base_url / "upload" / "image"), files=files)
+                str(self.comfyui.base_url / "upload" / "image"), files=files
+            )
             image_name = res.json().get("name")
             image_names.append(image_name)
 
@@ -41,7 +43,8 @@ class ComfyUIWorkflowTool(Tool):
             image_ids = tool_parameters.get("image_ids")
             if image_ids is None:
                 workflow_json = self.comfyui.set_prompt_images_by_default(
-                    workflow_json, image_names)
+                    workflow_json, image_names
+                )
             else:
                 image_ids = image_ids.split(",")
                 try:
@@ -54,17 +57,19 @@ class ComfyUIWorkflowTool(Tool):
                     )
         seed_id = tool_parameters.get("seed_id")
         if seed_id is not None:
-            workflow_json = self.comfyui.set_prompt_seed_by_id(
-                workflow_json, seed_id)
+            workflow_json = self.comfyui.set_prompt_seed_by_id(workflow_json, seed_id)
         try:
-            output_images = self.comfyui.generate_image_by_prompt(
-                workflow_json)
+            output_images = self.comfyui.generate(workflow_json)
         except Exception as e:
             raise ToolProviderCredentialValidationError(
-                f"Failed to generate image: {str(e)}. Please check if the workflow JSON works on ComfyUI.")
+                f"Failed to generate image: {str(e)}. Please check if the workflow JSON works on ComfyUI."
+            )
         for img in output_images:
             yield self.create_blob_message(
                 blob=img["data"],
-                meta={"filename": img["filename"], "mime_type": mimetypes.guess_type(
-                    img["filename"])[0] or "image/png"},
+                meta={
+                    "filename": img["filename"],
+                    "mime_type": mimetypes.guess_type(img["filename"])[0]
+                    or "image/png",
+                },
             )

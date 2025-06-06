@@ -43,13 +43,14 @@ class ModelType(Enum):
 
 
 class ComfyuiTxt2Img(Tool):
-    def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
+    def _invoke(
+        self, tool_parameters: dict[str, Any]
+    ) -> Generator[ToolInvokeMessage, None, None]:
         base_url = self.runtime.credentials.get("base_url", "")
         if not base_url:
             yield self.create_text_message("Please input base_url")
         self.comfyui = ComfyUiClient(
-            base_url,
-            self.runtime.credentials.get("comfyui_api_key")
+            base_url, self.runtime.credentials.get("comfyui_api_key")
         )
         if tool_parameters.get("model"):
             self.runtime.credentials["model"] = tool_parameters["model"]
@@ -57,8 +58,7 @@ class ComfyuiTxt2Img(Tool):
         if not model:
             yield self.create_text_message("Please input model")
         if model not in self.comfyui.get_checkpoints():
-            raise ToolProviderCredentialValidationError(
-                f"model {model} does not exist")
+            raise ToolProviderCredentialValidationError(f"model {model} does not exist")
         prompt = tool_parameters.get("prompt", "")
         if not prompt:
             yield self.create_text_message("Please input prompt")
@@ -88,12 +88,14 @@ class ComfyuiTxt2Img(Tool):
         for lora in lora_list:
             if lora not in valid_loras:
                 raise ToolProviderCredentialValidationError(
-                    f"LORA {lora} does not exist.")
+                    f"LORA {lora} does not exist."
+                )
 
         lora_strength_list = []
         if len(tool_parameters.get("lora_strengths", "")) > 0:
-            lora_strength_list = [float(x) for x in tool_parameters.get(
-                "lora_strengths").split(",")]
+            lora_strength_list = [
+                float(x) for x in tool_parameters.get("lora_strengths").split(",")
+            ]
 
         yield from self.text2img(
             model=model,
@@ -160,14 +162,16 @@ class ComfyuiTxt2Img(Tool):
             lora_node["inputs"]["lora_name"] = lora_name
             lora_node["inputs"]["strength_model"] = strength
             lora_node["inputs"]["strength_clip"] = strength
-            lora_node["inputs"]["model"][0] = str(lora_start_id+i-1)
-            lora_node["inputs"]["clip"][0] = str(lora_start_id+i-1)
-            workflow_json[str(lora_start_id+i)] = lora_node
+            lora_node["inputs"]["model"][0] = str(lora_start_id + i - 1)
+            lora_node["inputs"]["clip"][0] = str(lora_start_id + i - 1)
+            workflow_json[str(lora_start_id + i)] = lora_node
         if len(lora_list) > 0:
-            workflow_json[str(
-                lora_start_id)]["inputs"]["model"][0] = sampler_node["inputs"]["model"][0]
-            workflow_json[str(
-                lora_start_id)]["inputs"]["clip"][0] = prompt_node["inputs"]["clip"][0]
+            workflow_json[str(lora_start_id)]["inputs"]["model"][0] = sampler_node[
+                "inputs"
+            ]["model"][0]
+            workflow_json[str(lora_start_id)]["inputs"]["clip"][0] = prompt_node[
+                "inputs"
+            ]["clip"][0]
             sampler_node["inputs"]["model"][0] = str(lora_end_id)
             prompt_node["inputs"]["clip"][0] = str(lora_end_id)
             negative_prompt_node["inputs"]["clip"][0] = str(lora_end_id)
@@ -179,16 +183,19 @@ class ComfyuiTxt2Img(Tool):
             workflow_json["3"]["inputs"]["positive"][0] = last_node_id
 
         try:
-            output_images = self.comfyui.generate_image_by_prompt(
-                workflow_json)
+            output_images = self.comfyui.generate(workflow_json)
         except Exception as e:
             raise ToolProviderCredentialValidationError(
-                f"Failed to generate image: {str(e)}")
+                f"Failed to generate image: {str(e)}"
+            )
         for img in output_images:
             yield self.create_blob_message(
                 blob=img["data"],
-                meta={"filename": img["filename"], "mime_type": mimetypes.guess_type(
-                    img["filename"])[0] or "image/png"},
+                meta={
+                    "filename": img["filename"],
+                    "mime_type": mimetypes.guess_type(img["filename"])[0]
+                    or "image/png",
+                },
             )
 
     def get_runtime_parameters(self) -> list[ToolParameter]:
@@ -225,8 +232,7 @@ class ComfyuiTxt2Img(Tool):
                             default=models[0],
                             options=[
                                 ToolParameterOption(
-                                    value=i, label=I18nObject(
-                                        en_US=i, zh_Hans=i)
+                                    value=i, label=I18nObject(en_US=i, zh_Hans=i)
                                 )
                                 for i in models
                             ],
@@ -251,8 +257,7 @@ class ComfyuiTxt2Img(Tool):
                                 required=False,
                                 options=[
                                     ToolParameterOption(
-                                        value=i, label=I18nObject(
-                                            en_US=i, zh_Hans=i)
+                                        value=i, label=I18nObject(en_US=i, zh_Hans=i)
                                     )
                                     for i in loras
                                 ],
@@ -278,8 +283,7 @@ class ComfyuiTxt2Img(Tool):
                             default=sample_methods[0],
                             options=[
                                 ToolParameterOption(
-                                    value=i, label=I18nObject(
-                                        en_US=i, zh_Hans=i)
+                                    value=i, label=I18nObject(en_US=i, zh_Hans=i)
                                 )
                                 for i in sample_methods
                             ],
@@ -289,8 +293,7 @@ class ComfyuiTxt2Img(Tool):
                     parameters.append(
                         ToolParameter(
                             name="scheduler",
-                            label=I18nObject(
-                                en_US="Scheduler", zh_Hans="Scheduler"),
+                            label=I18nObject(en_US="Scheduler", zh_Hans="Scheduler"),
                             human_description=I18nObject(
                                 en_US="Scheduler of Stable Diffusion, you can check the official documentation of Stable Diffusion",
                                 zh_Hans="Stable Diffusion 的Scheduler，您可以查看 Stable Diffusion 的官方文档",
@@ -302,8 +305,7 @@ class ComfyuiTxt2Img(Tool):
                             default=schedulers[0],
                             options=[
                                 ToolParameterOption(
-                                    value=i, label=I18nObject(
-                                        en_US=i, zh_Hans=i)
+                                    value=i, label=I18nObject(en_US=i, zh_Hans=i)
                                 )
                                 for i in schedulers
                             ],
@@ -312,8 +314,7 @@ class ComfyuiTxt2Img(Tool):
                 parameters.append(
                     ToolParameter(
                         name="model_type",
-                        label=I18nObject(en_US="Model Type",
-                                         zh_Hans="Model Type"),
+                        label=I18nObject(en_US="Model Type", zh_Hans="Model Type"),
                         human_description=I18nObject(
                             en_US="Model Type of Stable Diffusion or Flux, you can check the official documentation of Stable Diffusion or Flux",
                             zh_Hans="Stable Diffusion 或 FLUX 的模型类型，您可以查看 Stable Diffusion 或 Flux 的官方文档",

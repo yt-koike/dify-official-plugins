@@ -21,8 +21,7 @@ class ComfyuiDepthAnything(Tool):
         if not base_url:
             yield self.create_text_message("Please input base_url")
         self.comfyui = ComfyUiClient(
-            base_url,
-            self.runtime.credentials.get("comfyui_api_key")
+            base_url, self.runtime.credentials.get("comfyui_api_key")
         )
         model = tool_parameters.get("model", None)
         if not model:
@@ -34,7 +33,8 @@ class ComfyuiDepthAnything(Tool):
             if image.type != FileType.IMAGE:
                 continue
             image_name = self.comfyui.upload_image(
-                image.filename, image.blob, image.mime_type)
+                image.filename, image.blob, image.mime_type
+            )
             image_names.append(image_name)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -44,14 +44,17 @@ class ComfyuiDepthAnything(Tool):
         workflow_json["3"]["inputs"]["image"] = image_names[0]
 
         try:
-            output_images = self.comfyui.generate_image_by_prompt(
-                workflow_json)
+            output_images = self.comfyui.generate(workflow_json)
         except Exception as e:
             raise ToolProviderCredentialValidationError(
-                f"Failed to generate image: {str(e)}. Maybe install https://github.com/kijai/ComfyUI-DepthAnythingV2 on ComfyUI")
+                f"Failed to generate image: {str(e)}. Maybe install https://github.com/kijai/ComfyUI-DepthAnythingV2 on ComfyUI"
+            )
         for img in output_images:
             yield self.create_blob_message(
                 blob=img["data"],
-                meta={"filename": img["filename"], "mime_type": mimetypes.guess_type(
-                    img["filename"])[0] or "image/png"},
+                meta={
+                    "filename": img["filename"],
+                    "mime_type": mimetypes.guess_type(img["filename"])[0]
+                    or "image/png",
+                },
             )

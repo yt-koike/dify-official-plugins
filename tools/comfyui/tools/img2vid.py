@@ -56,12 +56,10 @@ class ComfyuiImg2Vid(Tool):
             self.runtime.credentials["model"] = tool_parameters["model"]
         model = self.runtime.credentials.get("model", None)
         if not model:
-            raise ToolProviderCredentialValidationError(
-                "Please input model")
+            raise ToolProviderCredentialValidationError("Please input model")
 
         if model not in self.comfyui.get_checkpoints():
-            raise ToolProviderCredentialValidationError(
-                f"model {model} does not exist")
+            raise ToolProviderCredentialValidationError(f"model {model} does not exist")
         steps = tool_parameters.get("steps", 20)
         valid_samplers = self.comfyui.get_samplers()
         valid_schedulers = self.comfyui.get_schedulers()
@@ -87,11 +85,11 @@ class ComfyuiImg2Vid(Tool):
             if image.type != FileType.IMAGE:
                 continue
             image_name = self.comfyui.upload_image(
-                image.filename, image.blob, image.mime_type)
+                image.filename, image.blob, image.mime_type
+            )
             image_names.append(image_name)
         if len(image_names) == 0:
-            raise ToolProviderCredentialValidationError(
-                "Please input images")
+            raise ToolProviderCredentialValidationError("Please input images")
         yield from self.img2vid(
             model=model,
             width=width,
@@ -142,14 +140,17 @@ class ComfyuiImg2Vid(Tool):
         workflow_json["23"]["inputs"]["image"] = image_name
 
         try:
-            output_images = self.comfyui.generate_image_by_prompt(
-                workflow_json)
+            output_images = self.comfyui.generate(workflow_json)
         except Exception as e:
             raise ToolProviderCredentialValidationError(
-                f"Failed to generate image: {str(e)}")
+                f"Failed to generate image: {str(e)}"
+            )
         for img in output_images:
             yield self.create_blob_message(
                 blob=img["data"],
-                meta={"filename": img["filename"], "mime_type": mimetypes.guess_type(
-                    img["filename"])[0] or "image/png"},
+                meta={
+                    "filename": img["filename"],
+                    "mime_type": mimetypes.guess_type(img["filename"])[0]
+                    or "image/png",
+                },
             )

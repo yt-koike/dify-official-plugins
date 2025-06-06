@@ -42,8 +42,9 @@ class ComfyUiClient:
         """
         try:
             api_url = str(self.base_url / "models" / "checkpoints")
-            response = httpx.get(url=api_url, timeout=(
-                2, 10), headers=self._get_headers())  # Add headers
+            response = httpx.get(
+                url=api_url, timeout=(2, 10), headers=self._get_headers()
+            )  # Add headers
             if response.status_code != 200:
                 return []
             else:
@@ -57,8 +58,9 @@ class ComfyUiClient:
         """
         try:
             api_url = str(self.base_url / "models" / "upscale_models")
-            response = httpx.get(url=api_url, timeout=(
-                2, 10), headers=self._get_headers())  # Add headers
+            response = httpx.get(
+                url=api_url, timeout=(2, 10), headers=self._get_headers()
+            )  # Add headers
             if response.status_code != 200:
                 return []
             else:
@@ -72,8 +74,9 @@ class ComfyUiClient:
         """
         try:
             api_url = str(self.base_url / "models" / "loras")
-            response = httpx.get(url=api_url, timeout=(
-                2, 10), headers=self._get_headers())  # Add headers
+            response = httpx.get(
+                url=api_url, timeout=(2, 10), headers=self._get_headers()
+            )  # Add headers
             if response.status_code != 200:
                 return []
             else:
@@ -87,8 +90,9 @@ class ComfyUiClient:
         """
         try:
             api_url = str(self.base_url / "object_info" / "KSampler")
-            response = httpx.get(url=api_url, timeout=(
-                2, 10), headers=self._get_headers())  # Add headers
+            response = httpx.get(
+                url=api_url, timeout=(2, 10), headers=self._get_headers()
+            )  # Add headers
             if response.status_code != 200:
                 return []
             else:
@@ -103,8 +107,9 @@ class ComfyUiClient:
         """
         try:
             api_url = str(self.base_url / "object_info" / "KSampler")
-            response = httpx.get(url=api_url, timeout=(
-                2, 10), headers=self._get_headers())  # Add headers
+            response = httpx.get(
+                url=api_url, timeout=(2, 10), headers=self._get_headers()
+            )  # Add headers
             if response.status_code != 200:
                 return []
             else:
@@ -114,18 +119,19 @@ class ComfyUiClient:
             return []
 
     def get_history(self, prompt_id: str) -> dict:
-        res = httpx.get(str(self.base_url / "history"),
-                        params={"prompt_id": prompt_id},
-                        headers=self._get_headers())  # Add headers
+        res = httpx.get(
+            str(self.base_url / "history"),
+            params={"prompt_id": prompt_id},
+            headers=self._get_headers(),
+        )  # Add headers
         history = res.json()[prompt_id]
         return history
 
     def get_image(self, filename: str, subfolder: str, folder_type: str) -> bytes:
         response = httpx.get(
             str(self.base_url / "view"),
-            params={"filename": filename,
-                    "subfolder": subfolder, "type": folder_type},
-            headers=self._get_headers()  # Add headers
+            params={"filename": filename, "subfolder": subfolder, "type": folder_type},
+            headers=self._get_headers(),  # Add headers
         )
         return response.content
 
@@ -142,7 +148,10 @@ class ComfyUiClient:
         try:
             res = requests.post(
                 # Add headers for requests
-                str(self.base_url / "upload" / "image"), files=files, headers=self._get_headers())
+                str(self.base_url / "upload" / "image"),
+                files=files,
+                headers=self._get_headers(),
+            )
             image_name = res.json().get("name")
             return image_name
         except:
@@ -152,13 +161,14 @@ class ComfyUiClient:
         res = httpx.post(
             str(self.base_url / "prompt"),
             json={"client_id": client_id, "prompt": prompt},
-            headers=self._get_headers()  # Add headers
+            headers=self._get_headers(),  # Add headers
         )
         try:
             prompt_id = res.json()["prompt_id"]
         except:
             raise ToolProviderCredentialValidationError(
-                "Error queuing the prompt. Please check the workflow JSON.")
+                "Error queuing the prompt. Please check the workflow JSON."
+            )
         return prompt_id
 
     def open_websocket_connection(self) -> tuple[WebSocket, str]:
@@ -180,8 +190,7 @@ class ComfyUiClient:
         self, origin_prompt: dict, positive_prompt: str, negative_prompt: str = ""
     ) -> dict:
         prompt = origin_prompt.copy()
-        id_to_class_type = {id: details["class_type"]
-                            for id, details in prompt.items()}
+        id_to_class_type = {id: details["class_type"] for id, details in prompt.items()}
         k_sampler = [
             key for key, value in id_to_class_type.items() if value == "KSampler"
         ][0]
@@ -206,8 +215,7 @@ class ComfyUiClient:
         self, origin_prompt: dict, image_names: list[str]
     ) -> dict:
         prompt = origin_prompt.copy()
-        id_to_class_type = {id: details["class_type"]
-                            for id, details in prompt.items()}
+        id_to_class_type = {id: details["class_type"] for id, details in prompt.items()}
         load_image_nodes = [
             key for key, value in id_to_class_type.items() if value == "LoadImage"
         ]
@@ -220,11 +228,9 @@ class ComfyUiClient:
         if seed_id not in prompt:
             raise Exception("Not a valid seed node")
         if "seed" in prompt[seed_id]["inputs"]:
-            prompt[seed_id]["inputs"]["seed"] = random.randint(
-                10**14, 10**15 - 1)
+            prompt[seed_id]["inputs"]["seed"] = random.randint(10**14, 10**15 - 1)
         elif "noise_seed" in prompt[seed_id]["inputs"]:
-            prompt[seed_id]["inputs"]["noise_seed"] = random.randint(
-                10**14, 10**15 - 1)
+            prompt[seed_id]["inputs"]["noise_seed"] = random.randint(10**14, 10**15 - 1)
         else:
             raise Exception("Not a valid seed node")
         return prompt
@@ -240,8 +246,7 @@ class ComfyUiClient:
                 if message["type"] == "progress":
                     data = message["data"]
                     current_step = data["value"]
-                    print("In K-Sampler -> Step: ",
-                          current_step, " of: ", data["max"])
+                    print("In K-Sampler -> Step: ", current_step, " of: ", data["max"])
                 if message["type"] == "execution_cached":
                     data = message["data"]
                     for itm in data["nodes"]:
@@ -276,14 +281,13 @@ class ComfyUiClient:
         url = str(self.base_url / "view")
         response = httpx.get(
             url,
-            params={"filename": filename,
-                    "subfolder": subfolder, "type": folder_type},
+            params={"filename": filename, "subfolder": subfolder, "type": folder_type},
             timeout=(2, 10),
-            headers=self._get_headers()  # Add headers
+            headers=self._get_headers(),  # Add headers
         )
         return response.content
 
-    def generate_image_by_prompt(self, workflow_json: dict) -> list[dict]:
+    def generate(self, workflow_json: dict) -> list[dict]:
         try:
             ws, client_id = self.open_websocket_connection()
             prompt_id = self.queue_prompt(client_id, workflow_json)
@@ -315,7 +319,7 @@ class ComfyUiClient:
                 url,
                 data=json.dumps({"client_id": client_id, "prompt": prompt}),
                 timeout=(2, 10),
-                headers=self._get_headers()
+                headers=self._get_headers(),
             )
             prompt_id = respond.json()["prompt_id"]
             ws = WebSocket()
@@ -330,7 +334,7 @@ class ComfyUiClient:
             ws.connect(
                 str(URL(f"{ws_url}") / "ws") + f"?clientId={client_id}",
                 timeout=120,
-                header=headers
+                header=headers,
             )
             output_images = {}
             while True:
@@ -343,9 +347,9 @@ class ComfyUiClient:
                             break
                     elif message["type"] == "status":
                         data = message["data"]
-                        if data["status"]["exec_info"]["queue_remaining"] == 0 and data.get(
-                            "sid"
-                        ):
+                        if data["status"]["exec_info"][
+                            "queue_remaining"
+                        ] == 0 and data.get("sid"):
                             break
                     else:
                         continue

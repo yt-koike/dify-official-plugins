@@ -24,12 +24,10 @@ class DownloadHuggingFace(Tool):
             yield self.create_text_message("Please input base_url")
         hf_api_key = self.runtime.credentials.get("hf_api_key")
         if hf_api_key is None:
-            raise ToolProviderCredentialValidationError(
-                "Please input hf_api_key")
+            raise ToolProviderCredentialValidationError("Please input hf_api_key")
 
         self.comfyui = ComfyUiClient(
-            base_url,
-            self.runtime.credentials.get("comfyui_api_key")
+            base_url, self.runtime.credentials.get("comfyui_api_key")
         )
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -72,8 +70,7 @@ class DownloadHuggingFace(Tool):
             )
 
         try:
-            client_id = str(uuid.uuid4())
-            self.comfyui.queue_prompt_image(client_id, prompt=workflow_json)
+            output_images = self.comfyui.generate(workflow_json)
         except Exception as e:
             raise ToolProviderCredentialValidationError(
                 f"Failed to download: {str(e)}. Please make sure https://github.com/ServiceStack/comfy-asset-downloader works on ComfyUI"
