@@ -1,5 +1,4 @@
 import json
-import mimetypes
 import os
 import random
 from copy import deepcopy
@@ -194,7 +193,6 @@ class ComfyuiImg2Img(Tool):
                 blob=img["data"],
                 meta={
                     "filename": img["filename"],
-                    "mime_type": mimetypes.guess_type(img["filename"])[0]
-                    or "image/png",
+                    "mime_type": img["mime_type"],
                 },
             )

@@ -1,5 +1,4 @@
 import json
-import mimetypes
 import os
 from enum import Enum
 from typing import Any, Generator
@@ -62,7 +61,6 @@ class ComfyuiFaceSwap(Tool):
                 blob=img["data"],
                 meta={
                     "filename": img["filename"],
-                    "mime_type": mimetypes.guess_type(img["filename"])[0]
-                    or "image/png",
+                    "mime_type": img["mime_type"],
                 },
             )

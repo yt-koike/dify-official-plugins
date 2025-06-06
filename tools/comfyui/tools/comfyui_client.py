@@ -306,6 +306,7 @@ class ComfyUiClient:
                     {
                         "data": image_data,
                         "filename": img["filename"],
+                        "mime_type": img["mime_type"],
                         "type": img["type"],
                     }
                 )
