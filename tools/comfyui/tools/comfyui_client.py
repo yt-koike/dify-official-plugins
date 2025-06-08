@@ -291,11 +291,14 @@ class ComfyUiClient:
     def generate(self, workflow_json: dict) -> list[dict]:
         try:
             ws, client_id = self.open_websocket_connection()
+        except Exception as e:
+            raise Exception("Failed to open websocket:" + str(e))
+        try:
             prompt_id = self.queue_prompt(client_id, workflow_json)
             self.wait_until_generation(workflow_json, ws, prompt_id)
-            ws.close()
         except Exception as e:
-            raise Exception("Failed to generate image")
+            raise Exception("Error occured during image generation:" + str(e))
+        ws.close()
         history = self.get_history(prompt_id)
         images = []
         for output in history["outputs"].values():

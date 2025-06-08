@@ -15,7 +15,6 @@ from dify_plugin import Tool
 
 from tools.comfyui_client import ComfyUiClient
 
-SD_TXT2IMG_OPTIONS = {}
 LORA_NODE = {
     "inputs": {
         "lora_name": "",
@@ -96,44 +95,17 @@ class ComfyuiTxt2Img(Tool):
                 float(x) for x in tool_parameters.get("lora_strengths").split(",")
             ]
 
-        yield from self.text2img(
-            model=model,
-            model_type=model_type,
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            width=width,
-            height=height,
-            steps=steps,
-            sampler_name=sampler_name,
-            scheduler=scheduler,
-            cfg=cfg,
-            lora_list=lora_list,
-            lora_strength_list=lora_strength_list,
-        )
+        # make workflow json
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        workflow_template_path = os.path.join(current_dir, "json", "txt2img.json")
+        is_hiresfix_enabled: bool = tool_parameters.get("hiresfix_enabled", 0) > 0
+        if is_hiresfix_enabled:
+            workflow_template_path = os.path.join(
+                current_dir, "json", "txt2img_hiresfix.json"
+            )
+        with open(workflow_template_path) as file:
+            workflow_json = json.load(file)
 
-    def text2img(
-        self,
-        model: str,
-        model_type: str,
-        prompt: str,
-        negative_prompt: str,
-        width: int,
-        height: int,
-        steps: int,
-        sampler_name: str,
-        scheduler: str,
-        cfg: float,
-        lora_list: list,
-        lora_strength_list: list,
-    ) -> Generator[ToolInvokeMessage, None, None]:
-        """
-        generate image
-        """
-        if not SD_TXT2IMG_OPTIONS:
-            current_dir = os.path.dirname(os.path.realpath(__file__))
-            with open(os.path.join(current_dir, "json", "txt2img.json")) as file:
-                SD_TXT2IMG_OPTIONS.update(json.load(file))
-        workflow_json = deepcopy(SD_TXT2IMG_OPTIONS)
         sampler_node = workflow_json["3"]
         prompt_node = workflow_json["6"]
         negative_prompt_node = workflow_json["7"]
@@ -147,9 +119,30 @@ class ComfyuiTxt2Img(Tool):
         workflow_json["5"]["inputs"]["height"] = height
         prompt_node["inputs"]["text"] = prompt
         negative_prompt_node["inputs"]["text"] = negative_prompt
+
+        if is_hiresfix_enabled:
+            sampler_node2 = workflow_json["11"]
+            sampler_node2["inputs"]["sampler_name"] = sampler_name
+            sampler_node2["inputs"]["scheduler"] = scheduler
+            sampler_node2["inputs"]["steps"] = steps
+            sampler_node2["inputs"]["cfg"] = cfg
+            sampler_node2["inputs"]["denoise"] = tool_parameters.get(
+                "hiresfix_denoise", 0.6
+            )
+
+            hiresfix_size_ratio = tool_parameters.get("hiresfix_size_ratio", 0.5)
+            workflow_json["5"]["inputs"]["width"] = round(width * hiresfix_size_ratio)
+            workflow_json["5"]["inputs"]["height"] = round(height * hiresfix_size_ratio)
+            workflow_json["10"]["inputs"]["width"] = width
+            workflow_json["10"]["inputs"]["height"] = height
+            workflow_json["10"]["inputs"]["upscale_method"] = tool_parameters.get(
+                "hiresfix_upscale_method", "bilinear"
+            )
+
         if model_type in {ModelType.SD3.name, ModelType.FLUX.name}:
             workflow_json["5"]["class_type"] = "EmptySD3LatentImage"
 
+        # add loras to workflow json
         lora_start_id = 100
         lora_end_id = lora_start_id + len(lora_list) - 1
         for i, lora_name in enumerate(lora_list):
@@ -181,6 +174,7 @@ class ComfyuiTxt2Img(Tool):
             workflow_json[last_node_id]["inputs"]["conditioning"][0] = "6"
             workflow_json["3"]["inputs"]["positive"][0] = last_node_id
 
+        # send a query to ComfyUI
         try:
             output_images = self.comfyui.generate(workflow_json)
         except Exception as e:
@@ -195,6 +189,7 @@ class ComfyuiTxt2Img(Tool):
                     "mime_type": img["mime_type"],
                 },
             )
+        yield self.create_json_message(workflow_json)
 
     def get_runtime_parameters(self) -> list[ToolParameter]:
         parameters = [
