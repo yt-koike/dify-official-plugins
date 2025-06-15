@@ -46,7 +46,11 @@ class DownloadCivitAI(Tool):
         if "error" in model_data:
             raise ToolProviderCredentialValidationError(model_data["error"])
         if version_id is None:
-            version_ids = [v["id"] for v in model_data["modelVersions"]]
+            version_ids = [
+                v["id"]
+                for v in model_data["modelVersions"]
+                if v["availability"] == "Public"
+            ]
             version_id = max(version_ids)
         model_detail = None
         for past_model in model_data["modelVersions"]:
